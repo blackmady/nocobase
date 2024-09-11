@@ -51,7 +51,7 @@ export default class NotificationServer extends NotificationServerBase {
     title: string;
     status: 'read' | 'unread';
     receiveTimestamp?: number;
-  }): Promise<boolean> => {
+  }): Promise<any> => {
     const chatsRepo = this.plugin.app.db.getRepository(ChatsDefinition.name);
     const messagesRepo = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
     let chat = await chatsRepo.findOne({ filter: { senderId, userId } });
@@ -70,7 +70,7 @@ export default class NotificationServer extends NotificationServerBase {
       },
     });
     await chatsRepo.update({ values: { latestMsgId: message.id }, filterByTk: chat.id });
-    return true;
+    return message;
   };
 
   send: SendFnType<InAppMessageFormValues> = async (options) => {
@@ -80,16 +80,7 @@ export default class NotificationServer extends NotificationServerBase {
 
     await Promise.all(
       receivers.map(async (userId) => {
-        const clients = this.userClientsMap[userId];
-        if (clients) {
-          for (const clientId in clients) {
-            const stream = clients[clientId];
-            const messageData = { content: content.body, title };
-            stream.write(`data: ${JSON.stringify(messageData)}\n\n`);
-          }
-        }
-
-        await this.saveMessageToDB({
+        const message = await this.saveMessageToDB({
           title,
           content: content.body,
           senderName,
@@ -97,10 +88,18 @@ export default class NotificationServer extends NotificationServerBase {
           status: 'unread',
           userId,
         });
+
+        const clients = this.userClientsMap[userId];
+        if (clients) {
+          for (const clientId in clients) {
+            const stream = clients[clientId];
+            stream.write(`data: ${JSON.stringify({ type: 'message:created', data: message })}\n\n`);
+          }
+        }
       }),
     );
     // 测试用
-    await this.mockMessages();
+    // await this.mockMessages();
     return { status: 'success', receivers, content: content.body, title };
   };
 
@@ -197,6 +196,7 @@ export default class NotificationServer extends NotificationServerBase {
             if (filter?.latestMsgReceiveTimestamp?.$lt) {
               conditions.push(Sequelize.literal(`latestMsgReceiveTimestamp < ${filter.latestMsgReceiveTimestamp.$lt}`));
             }
+            if (filter?.id) conditions.push({ id: filter.id });
 
             const chatsRepo = this.plugin.app.db.getRepository(ChatsDefinition.name);
             try {

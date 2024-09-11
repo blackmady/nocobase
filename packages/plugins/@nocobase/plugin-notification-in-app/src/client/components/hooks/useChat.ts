@@ -27,6 +27,7 @@ export type Group = {
   latestMsgTitle: string;
 };
 const useChats = () => {
+  const apiClient = useAPIClient();
   const [groupMap, setGroupMap] = useState<Record<string, Group>>({});
   const addChat = useCallback((chat) => {
     setGroupMap(
@@ -45,24 +46,42 @@ const useChats = () => {
       }),
     );
   }, []);
+  const requestChats = useCallback(
+    async ({ filter = {}, limit = 30 }: { filter?: Record<string, any>; limit?: number }) => {
+      const res = await apiClient.request({
+        url: 'myInSiteChats:list',
+        method: 'get',
+        params: { filter, limit },
+      });
+      const chats = res.data.data.chats;
+      if (Array.isArray(chats)) return chats;
+      else return [];
+    },
+    [apiClient],
+  );
 
-  const addMessagesToGroup = useCallback((groupId: string, messages: Message[]) => {
-    setGroupMap(
-      produce((draft) => {
-        const group = draft[groupId];
-        if (group) {
-          messages.forEach((message) => {
-            group.msgMap[message.id] = message;
-          });
-        }
-      }),
-    );
-  }, []);
+  const addMessagesToGroup = useCallback(
+    async (groupId: string, messages: Message[]) => {
+      const groups = await requestChats({ filter: { id: groupId } });
+      if (groups.length < 1) return;
+      const group = groups[0];
+      if (group)
+        setGroupMap(
+          produce((draft) => {
+            draft[groupId] = { ...(draft[groupId] ?? {}), ...group };
+            if (!draft[groupId].msgMap) draft[groupId].msgMap = {};
+            messages.forEach((message) => {
+              draft[groupId].msgMap[message.id] = message;
+            });
+          }),
+        );
+    },
+    [requestChats],
+  );
 
   const chatList = useMemo(() => {
     return Object.values(groupMap).sort((a, b) => (a.latestMsgReceiveTimestamp > b.latestMsgReceiveTimestamp ? -1 : 1));
   }, [groupMap]);
-  const apiClient = useAPIClient();
 
   const fetchChats = useCallback(
     async ({ filter = {}, limit = 30 }: { filter?: Record<string, any>; limit?: number }) => {
@@ -97,6 +116,7 @@ const useChats = () => {
     addChats,
     fetchChats,
     fetchMessages,
+    addMessagesToGroup,
   };
 };
 

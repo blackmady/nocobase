@@ -25,6 +25,8 @@ import { useNavigate } from 'react-router-dom';
 import useChats from './hooks/useChat';
 import { InboxContent } from './InboxContent';
 import { useLocalTranslation } from '../../locale';
+import { SSEData } from '../../types/sse';
+import { add } from 'packages/core/actions/src/actions';
 
 const useStyles = createStyles(({ token }) => {
   return {
@@ -42,7 +44,7 @@ export const Inbox = (props) => {
   const [visible, setVisible] = useState(false);
 
   const { styles } = useStyles();
-  const { fetchChats, chatList, fetchMessages, chatMap } = useChats();
+  const { fetchChats, chatList, fetchMessages, chatMap, addMessagesToGroup } = useChats();
 
   const updateUnreadCount = useCallback(async () => {
     const res = await apiClient.request({
@@ -87,9 +89,13 @@ export const Inbox = (props) => {
         try {
           const { value, done } = await reader.read();
           if (done) break;
-          const data = JSON.parse(value.replace(/^data:\s*/, '').trim());
-          notification.info({ message: data.title, description: data.content });
-          updateUnreadCount();
+          const sseData: SSEData = JSON.parse(value.replace(/^data:\s*/, '').trim());
+          if (sseData.type === 'message:created') {
+            const { data } = sseData;
+            notification.info({ message: data.title, description: data.content });
+            addMessagesToGroup(data.chatId, [data]);
+            updateUnreadCount();
+          }
         } catch (error) {
           console.error(error);
           break;
