@@ -81,7 +81,7 @@ export const InboxContent = ({
 
   return (
     <Layout style={{ height: '100%' }}>
-      <Layout.Sider width={400} style={{ height: '100%', overflowY: 'auto', background: '#fff' }}>
+      <Layout.Sider width={300} style={{ height: '100%', overflowY: 'auto', background: '#fff' }}>
         <List
           itemLayout="horizontal"
           dataSource={groups}
@@ -95,34 +95,47 @@ export const InboxContent = ({
                 }
               `}
               style={{
-                paddingLeft: '12px',
+                padding: '10px 15px',
                 backgroundColor: selectedGroupId === item.id ? '#e4e5e6' : null,
+                height: '80px',
                 cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
               }}
               onClick={() => {
                 setSelectedGroupId(item.id);
                 onGroupClick(item.id);
               }}
             >
-              <List.Item.Meta
-                title={
-                  <Flex justify="space-between">
-                    <div style={{ width: '100px', textOverflow: 'ellipsis' }}>{item.title}</div>
-                    <div
-                      style={{
-                        float: 'right',
-                        fontWeight: 400,
-                        color: 'rgba(0, 0, 0, 0.45)',
-                        paddingRight: 12,
-                      }}
-                    >
-                      {dayjs(item.latestMsgReceiveTimestamp).format('MM-DD HH:mm:ss')}
-                    </div>
-                  </Flex>
-                }
-                description={item.latestMsgTitle}
-              />
-              <Badge offset={[-10, 22]} count={item.unreadMsgCnt}></Badge>
+              <Flex justify="space-between" style={{ width: '100%' }}>
+                <div
+                  style={{
+                    width: '150px',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {item.title}
+                </div>
+                <div
+                  style={{
+                    width: '80px',
+                    fontWeight: 400,
+                    color: 'rgba(0, 0, 0, 0.45)',
+                    textAlign: 'right',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {dayjs(item.latestMsgReceiveTimestamp).format('MM-DD')}
+                </div>
+              </Flex>
+              <Flex justify="space-between" style={{ width: '100%' }}>
+                <div style={{ color: 'rgba(0, 0, 0, 0.45)' }}> {item.latestMsgTitle}</div>
+                <Badge count={item.unreadMsgCnt}></Badge>
+              </Flex>
             </List.Item>
           )}
         />
