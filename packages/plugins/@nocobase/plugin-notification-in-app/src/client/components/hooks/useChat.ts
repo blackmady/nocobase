@@ -39,8 +39,8 @@ const useChats = () => {
     setGroupMap(
       produce((draft) => {
         groups.forEach((group) => {
-          group.msgMap = {};
-          draft[group.id] = group;
+          draft[group.id] = { ...draft[group.id], ...group };
+          if (!draft[group.id].msgMap) draft[group.id].msgMap = {};
         });
       }),
     );
@@ -77,16 +77,16 @@ const useChats = () => {
     [apiClient, addChats],
   );
 
-  const fetchMessagesByGroupId = useCallback(
-    async ({ groupId }) => {
+  const fetchMessages = useCallback(
+    async ({ filter }) => {
       const res = await apiClient.request({
         url: 'myInSiteMessages:list',
         method: 'get',
         params: {
-          groupId,
+          filter,
         },
       });
-      addMessagesToGroup(groupId, res.data.data.messages);
+      addMessagesToGroup(filter.chatId, res.data.data.messages);
     },
     [apiClient, addMessagesToGroup],
   );
@@ -96,7 +96,7 @@ const useChats = () => {
     addChat,
     addChats,
     fetchChats,
-    fetchMessagesByGroupId,
+    fetchMessages,
   };
 };
 

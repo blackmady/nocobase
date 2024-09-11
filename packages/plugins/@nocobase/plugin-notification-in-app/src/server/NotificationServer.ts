@@ -76,7 +76,7 @@ export default class NotificationServer extends NotificationServerBase {
   send: SendFnType<InAppMessageFormValues> = async (options) => {
     const { message } = options;
     const { content, receivers } = message;
-    const { title, senderId } = content.config;
+    const { title, senderId, senderName } = content.config;
 
     await Promise.all(
       receivers.map(async (userId) => {
@@ -92,7 +92,7 @@ export default class NotificationServer extends NotificationServerBase {
         await this.saveMessageToDB({
           title,
           content: content.body,
-          senderName: title,
+          senderName,
           senderId,
           status: 'unread',
           userId,
@@ -171,15 +171,15 @@ export default class NotificationServer extends NotificationServerBase {
         list: {
           handler: async (ctx) => {
             const messagesRepo = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
-            const { groupId, filter = {} } = ctx.action.params;
+            const { filter = {} } = ctx.action.params;
             const messageList = await messagesRepo.find({
-              limit: 30,
+              limit: 20,
+              logging: console.log,
               filter: {
-                chatId: groupId,
-                userId: ctx.state.currentUser.id,
                 ...filter,
+                userId: ctx.state.currentUser.id,
               },
-              order: [['createdAt', 'DESC']],
+              sort: '-receiveTimestamp',
             });
             ctx.body = { messages: messageList };
           },

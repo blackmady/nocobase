@@ -27,6 +27,17 @@ export const ContentConfigForm = ({ variableOptions }) => {
         type: 'void',
 
         properties: {
+          senderName: {
+            type: 'string',
+            required: true,
+            title: `{{t("Sender name")}}`,
+            'x-decorator': 'FormItem',
+            'x-component': 'Variable.Input',
+            'x-component-props': {
+              scope: variableOptions,
+              useTypedConstant: ['string'],
+            },
+          },
           title: {
             type: 'string',
             required: true,

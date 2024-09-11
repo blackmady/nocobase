@@ -42,7 +42,7 @@ export const Inbox = (props) => {
   const [visible, setVisible] = useState(false);
 
   const { styles } = useStyles();
-  const { fetchChats, chatList, fetchMessagesByGroupId, chatMap } = useChats();
+  const { fetchChats, chatList, fetchMessages, chatMap } = useChats();
 
   const updateUnreadCount = useCallback(async () => {
     const res = await apiClient.request({
@@ -59,8 +59,8 @@ export const Inbox = (props) => {
   }, [updateUnreadCount]);
 
   const onIconClick = useCallback(() => {
-    fetchChats({});
     setVisible(true);
+    fetchChats({});
   }, [fetchChats]);
 
   useEffect(() => {
@@ -111,8 +111,9 @@ export const Inbox = (props) => {
         <InboxContent
           groups={chatList}
           groupMap={chatMap}
-          onGroupClick={(id) => fetchMessagesByGroupId({ groupId: id })}
+          onGroupClick={(id) => fetchMessages({ groupId: id })}
           fetchChats={fetchChats}
+          fetchMessages={fetchMessages}
         />
       </Drawer>
     </ConfigProvider>

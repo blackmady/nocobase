@@ -7,22 +7,25 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Layout, List, Card, Descriptions, Typography, Badge, Button, Flex } from 'antd';
 import type { Group as MsgGroup } from './hooks/useChat';
 import { css } from '@emotion/css';
 import { dayjs } from '@nocobase/utils/client';
+import { filter } from 'packages/plugins/@nocobase/plugin-workflow/src/client/schemas/collection';
 
 export const InboxContent = ({
   groups,
   groupMap,
   onGroupClick,
   fetchChats,
+  fetchMessages,
 }: {
   groups: Array<MsgGroup>;
   groupMap: Record<string, MsgGroup>;
   onGroupClick: (groupId: string) => any;
   fetchChats: (params: any) => any;
+  fetchMessages: (params: any) => any;
 }) => {
   const [selectedGroupId, setSelectedGroupId] = useState<string>(null);
   const selectedGroup = groupMap[selectedGroupId];
@@ -37,14 +40,28 @@ export const InboxContent = ({
   const onLoadChannelsMore = () => {
     const filter: Record<string, any> = {};
     const lastGroup = groups[groups.length - 1];
-    const latestMsgReceiveTimestamp = lastGroup && lastGroup.latestMsgReceiveTimestamp;
-    if (latestMsgReceiveTimestamp) {
+    if (lastGroup?.latestMsgReceiveTimestamp) {
       filter.latestMsgReceiveTimestamp = {
-        $lt: latestMsgReceiveTimestamp,
+        $lt: lastGroup.latestMsgReceiveTimestamp,
       };
     }
     fetchChats({ filter });
   };
+
+  const onLoadMessagesMore = useCallback(() => {
+    const filter: Record<string, any> = {};
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage) {
+      filter.receiveTimestamp = {
+        $lt: lastMessage.receiveTimestamp,
+      };
+    }
+    if (selectedGroupId) {
+      filter.chatId = selectedGroupId;
+    }
+    fetchMessages({ filter });
+  }, [fetchMessages, messages, selectedGroupId]);
+
   const loadChannelsMore = (
     <div
       style={{
@@ -57,6 +74,13 @@ export const InboxContent = ({
       <Button onClick={onLoadChannelsMore}>Loading more</Button>
     </div>
   );
+
+  useEffect(() => {
+    if (!selectedGroupId && groups.length > 0) {
+      setSelectedGroupId(groups[0].id);
+      fetchMessages({ filter: { chatId: groups[0].id } });
+    }
+  }, [selectedGroupId, groups, fetchMessages]);
 
   const MessageList = () => {
     return (
@@ -75,6 +99,7 @@ export const InboxContent = ({
             </Descriptions>
           </Card>
         ))}
+        <Button onClick={onLoadMessagesMore}>Load more</Button>
       </>
     );
   };
@@ -105,7 +130,7 @@ export const InboxContent = ({
               }}
               onClick={() => {
                 setSelectedGroupId(item.id);
-                onGroupClick(item.id);
+                fetchMessages({ filter: { chatId: item.id } });
               }}
             >
               <Flex justify="space-between" style={{ width: '100%' }}>
