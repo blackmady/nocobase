@@ -7,52 +7,42 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
+import { observer } from '@formily/reactive-react';
 import { Layout, List, Card, Descriptions, Typography, Badge, Button, Flex } from 'antd';
-import type { Group as MsgGroup } from './hooks/useChat';
 import { css } from '@emotion/css';
 import { dayjs } from '@nocobase/utils/client';
 import { useAPIClient } from '@nocobase/client';
 import { InAppMessagesDefinition } from '../../types';
-
-export const InboxContent = ({
-  groups,
-  groupMap,
-  onGroupClick,
-  fetchChats,
+import {
+  fetchChannels,
+  selectedChannelIdObs,
+  channelListObs,
+  channelMapObs,
   fetchMessages,
-}: {
-  groups: Array<MsgGroup>;
-  groupMap: Record<string, MsgGroup>;
-  onGroupClick: (groupId: string) => any;
-  fetchChats: (params: any) => any;
-  fetchMessages: (params: any) => any;
-}) => {
-  const [selectedGroupId, setSelectedGroupId] = useState<string>(null);
-  const selectedGroup = groupMap[selectedGroupId];
+  selectedMessageListObs,
+} from '../observables';
+
+const InnerInboxContent = () => {
   const apiClient = useAPIClient();
+  const channels = channelListObs.value;
+  const messages = selectedMessageListObs.value;
+  const selectedChannelId = selectedChannelIdObs.value;
   const readMessage = useCallback(async (params: Record<string, any>) => {
     apiClient.request({
       resource: 'messages',
     });
   }, []);
-  const messages = useMemo(() => {
-    if (!selectedGroupId) {
-      return [];
-    }
-    const msgMap = groups.find((group) => group.id === selectedGroupId).msgMap;
-    return Object.values(msgMap).sort((a, b) => (a.receiveTimestamp > b.receiveTimestamp ? -1 : 1));
-  }, [groups, selectedGroupId]);
 
   const onLoadChannelsMore = () => {
     const filter: Record<string, any> = {};
-    const lastGroup = groups[groups.length - 1];
-    if (lastGroup?.latestMsgReceiveTimestamp) {
+    const lastChannel = channels[channels.length - 1];
+    if (lastChannel?.latestMsgReceiveTimestamp) {
       filter.latestMsgReceiveTimestamp = {
-        $lt: lastGroup.latestMsgReceiveTimestamp,
+        $lt: lastChannel.latestMsgReceiveTimestamp,
       };
     }
-    fetchChats({ filter });
+    fetchChannels({ filter, limit: 30 });
   };
 
   const onLoadMessagesMore = useCallback(() => {
@@ -63,11 +53,11 @@ export const InboxContent = ({
         $lt: lastMessage.receiveTimestamp,
       };
     }
-    if (selectedGroupId) {
-      filter.chatId = selectedGroupId;
+    if (selectedChannelId) {
+      filter.chatId = selectedChannelId;
     }
-    fetchMessages({ filter });
-  }, [fetchMessages, messages, selectedGroupId]);
+    fetchMessages({ filter, limit: 30 });
+  }, [messages, selectedChannelId]);
 
   const loadChannelsMore = (
     <div
@@ -82,18 +72,11 @@ export const InboxContent = ({
     </div>
   );
 
-  useEffect(() => {
-    if (!selectedGroupId && groups.length > 0) {
-      setSelectedGroupId(groups[0].id);
-      fetchMessages({ filter: { chatId: groups[0].id } });
-    }
-  }, [selectedGroupId, groups, fetchMessages]);
-
   const MessageList = () => {
     return (
       <>
         <Typography.Title level={4} style={{ marginTop: 12 }}>
-          {selectedGroup.title}
+          {channelMapObs.value[selectedChannelId].title}
         </Typography.Title>
 
         {messages.map((message, index) => (
@@ -142,7 +125,7 @@ export const InboxContent = ({
       <Layout.Sider width={300} style={{ height: '100%', overflowY: 'auto', background: '#fff' }}>
         <List
           itemLayout="horizontal"
-          dataSource={groups}
+          dataSource={channels}
           loadMore={loadChannelsMore}
           style={{ paddingBottom: '20px' }}
           renderItem={(item) => (
@@ -154,7 +137,7 @@ export const InboxContent = ({
               `}
               style={{
                 padding: '10px 15px',
-                backgroundColor: selectedGroupId === item.id ? '#e4e5e6' : null,
+                backgroundColor: selectedChannelId === item.id ? '#e4e5e6' : null,
                 height: '80px',
                 cursor: 'pointer',
                 display: 'flex',
@@ -162,8 +145,7 @@ export const InboxContent = ({
                 justifyContent: 'space-between',
               }}
               onClick={() => {
-                setSelectedGroupId(item.id);
-                fetchMessages({ filter: { chatId: item.id } });
+                selectedChannelIdObs.value = item.id;
               }}
             >
               <Flex justify="space-between" style={{ width: '100%' }}>
@@ -199,8 +181,10 @@ export const InboxContent = ({
         />
       </Layout.Sider>
       <Layout.Content style={{ padding: '0 24px 30px 24px', height: '100%', overflowY: 'auto' }}>
-        {selectedGroupId ? <MessageList /> : null}
+        {selectedChannelId ? <MessageList /> : null}
       </Layout.Content>
     </Layout>
   );
 };
+
+export const InboxContent = observer(InnerInboxContent);

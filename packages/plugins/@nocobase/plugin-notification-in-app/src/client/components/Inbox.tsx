@@ -21,12 +21,12 @@ import { Badge, Button, ConfigProvider, notification, Drawer } from 'antd';
 import { createStyles } from 'antd-style';
 import { Icon } from '@nocobase/client';
 import { useAPIClient } from '@nocobase/client';
-import { useNavigate } from 'react-router-dom';
-import useChats from './hooks/useChat';
 import { InboxContent } from './InboxContent';
 import { useLocalTranslation } from '../../locale';
 import { SSEData } from '../../types/sse';
-
+import { fetchChannels } from '../observables';
+import { observer } from '@formily/reactive-react';
+import { updateUnreadMsgsCount, unreadMsgsCountObs, liveSSEObs } from '../observables';
 const useStyles = createStyles(({ token }) => {
   return {
     button: {
@@ -36,37 +36,21 @@ const useStyles = createStyles(({ token }) => {
   };
 });
 
-export const Inbox = (props) => {
+const InnerInbox = (props) => {
   const apiClient = useAPIClient();
   const { t } = useLocalTranslation();
-  const [unreadCount, setUnreadCount] = useState(0);
   const [visible, setVisible] = useState(false);
-
   const { styles } = useStyles();
-  const { fetchChats, chatList, fetchMessages, chatMap, addMessagesToGroup } = useChats();
 
-  const updateUnreadCount = useCallback(async () => {
-    const res = await apiClient.request({
-      url: 'myInSiteMessages:count',
-      method: 'get',
-      params: {
-        status: 'unread',
-      },
-    });
-    setUnreadCount(res.data.data.count);
-  }, [apiClient]);
   useEffect(() => {
-    updateUnreadCount();
-  }, [updateUnreadCount]);
+    updateUnreadMsgsCount();
+  }, []);
 
   const onIconClick = useCallback(() => {
     setVisible(true);
-    fetchChats({});
-  }, [fetchChats]);
+    fetchChannels({});
+  }, []);
 
-  useEffect(() => {
-    updateUnreadCount();
-  }, [updateUnreadCount]);
   useEffect(() => {
     const request = async () => {
       const res = await apiClient.request({
@@ -89,12 +73,7 @@ export const Inbox = (props) => {
           const { value, done } = await reader.read();
           if (done) break;
           const sseData: SSEData = JSON.parse(value.replace(/^data:\s*/, '').trim());
-          if (sseData.type === 'message:created') {
-            const { data } = sseData;
-            notification.info({ message: data.title, description: data.content });
-            addMessagesToGroup(data.chatId, [data]);
-            updateUnreadCount();
-          }
+          liveSSEObs.value = sseData;
         } catch (error) {
           console.error(error);
           break;
@@ -111,16 +90,11 @@ export const Inbox = (props) => {
       }}
     >
       <Button className={styles.button} title={'Apps'} icon={<Icon type={'MailOutlined'} />} onClick={onIconClick} />
-      {unreadCount > 0 && <Badge count={unreadCount} size="small" offset={[-18, -16]}></Badge>}
+      {unreadMsgsCountObs.value && <Badge count={unreadMsgsCountObs.value} size="small" offset={[-18, -16]}></Badge>}
       <Drawer title={t('Inbox')} open={visible} closeIcon={true} width={800} onClose={() => setVisible(false)}>
-        <InboxContent
-          groups={chatList}
-          groupMap={chatMap}
-          onGroupClick={(id) => fetchMessages({ groupId: id })}
-          fetchChats={fetchChats}
-          fetchMessages={fetchMessages}
-        />
+        <InboxContent />
       </Drawer>
     </ConfigProvider>
   );
 };
+export const Inbox = observer(InnerInbox);

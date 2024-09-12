@@ -174,6 +174,7 @@ export default class NotificationServer extends NotificationServerBase {
             const messageList = await messagesRepo.find({
               limit: 20,
               logging: console.log,
+              ...ctx.action.params,
               filter: {
                 ...filter,
                 userId: ctx.state.currentUser.id,
@@ -255,7 +256,7 @@ export default class NotificationServer extends NotificationServerBase {
                   [Op.and]: conditions,
                 },
               });
-              ctx.body = { chats: allChats };
+              ctx.body = { channels: allChats };
             } catch (error) {
               console.error(error);
             }

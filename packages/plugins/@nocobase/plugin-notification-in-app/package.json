@@ -6,10 +6,11 @@
     "immer": "^10.1.1"
   },
   "peerDependencies": {
+    "@formily/reactive": "^2",
+    "@formily/reactive-react": "^2",
     "@nocobase/client": "1.x",
     "@nocobase/plugin-notification-manager": "1.x",
     "@nocobase/server": "1.x",
-    "@nocobase/test": "1.x",
-    "react-router-dom": "^6"
+    "@nocobase/test": "1.x"
   }
 }

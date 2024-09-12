@@ -7,5 +7,14 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
-import { observable } from '@formily/reactive';
-export const channelMapObs = observable({});
+import { APIClient } from '@nocobase/client';
+
+let apiClient: APIClient;
+export const setAPIClient = (apiClientTarget: APIClient) => {
+  apiClient = apiClientTarget;
+};
+export const getAPIClient = () => apiClient;
+
+export * from './channel';
+export * from './message';
+export * from './sse';

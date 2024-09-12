@@ -21,7 +21,6 @@ import { Badge, Button, ConfigProvider, notification } from 'antd';
 import { createStyles } from 'antd-style';
 import { Icon } from '@nocobase/client';
 import { useAPIClient } from '@nocobase/client';
-import { useNavigate } from 'react-router-dom';
 import { NAMESPACE } from '..';
 const useStyles = createStyles(({ token }) => {
   return {
@@ -35,10 +34,7 @@ const useStyles = createStyles(({ token }) => {
 export const Inbox = (props) => {
   const apiClient = useAPIClient();
   const [unreadCount, setUnreadCount] = useState(0);
-  const navigate = useNavigate();
-  const onIconClick = useCallback(() => {
-    navigate(`/admin/settings/${NAMESPACE}`);
-  }, [navigate]);
+  const onIconClick = useCallback(() => {}, []);
 
   const { styles } = useStyles();
   const updateUnreadCount = useCallback(async () => {

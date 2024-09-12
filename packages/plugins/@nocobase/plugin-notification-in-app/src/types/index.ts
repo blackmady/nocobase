@@ -18,15 +18,29 @@ export interface Chat {
   lastMessageTime: string;
   lastviewTime: string;
 }
+export interface Channel {
+  id: string;
+  title: string;
+  userId: string;
+  unreadMsgCnt: number;
+  latestMsgReceiveTimestamp: number;
+  latestMsgTitle: string;
+}
 
 export interface Message {
   id: string;
+  title: string;
+  userId: string;
   chatId: string;
   content: string;
-  receiveTime: string;
+  receiveTimestamp: number;
   status: 'read' | 'unread';
 }
 
+export type SSEData = {
+  type: 'message:created';
+  data: Message;
+};
 export interface InAppMessageFormValues {
   content: Record<string, any>;
   senderName: string;
