@@ -10,7 +10,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAPIClient, useRequest } from '@nocobase/client';
 import { produce } from 'immer';
-import { dayjs } from '@nocobase/utils/client';
 export type Message = {
   id: string;
   title: string;
