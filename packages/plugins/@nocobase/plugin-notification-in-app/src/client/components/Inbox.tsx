@@ -26,7 +26,6 @@ import useChats from './hooks/useChat';
 import { InboxContent } from './InboxContent';
 import { useLocalTranslation } from '../../locale';
 import { SSEData } from '../../types/sse';
-import { add } from 'packages/core/actions/src/actions';
 
 const useStyles = createStyles(({ token }) => {
   return {

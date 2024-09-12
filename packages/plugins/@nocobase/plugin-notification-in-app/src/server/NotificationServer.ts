@@ -183,6 +183,15 @@ export default class NotificationServer extends NotificationServerBase {
             ctx.body = { messages: messageList };
           },
         },
+        update: {
+          handler: async (ctx) => {
+            const userId = ctx.state.currentUser.id;
+            const status = ctx.action.params.status;
+            const messages = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
+            const count = await messages.count({ filter: { userId, status: 'unread' } });
+            ctx.body = { count };
+          },
+        },
       },
     });
     this.plugin.app.resourceManager.define({

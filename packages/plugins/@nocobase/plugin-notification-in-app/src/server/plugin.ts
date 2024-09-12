@@ -8,7 +8,7 @@
  */
 
 import { Plugin } from '@nocobase/server';
-import { COLLECTION_NAME } from '@nocobase/plugin-notification-manager/src/constant';
+import { COLLECTION_NAME } from '@nocobase/plugin-notification-manager';
 import { inAppTypeName } from '../types';
 import NotificationsServerPlugin, { SendFnType, NotificationServerBase } from '@nocobase/plugin-notification-manager';
 import NotificationInSiteServer from './NotificationServer';

@@ -12,7 +12,8 @@ import { Layout, List, Card, Descriptions, Typography, Badge, Button, Flex } fro
 import type { Group as MsgGroup } from './hooks/useChat';
 import { css } from '@emotion/css';
 import { dayjs } from '@nocobase/utils/client';
-import { filter } from 'packages/plugins/@nocobase/plugin-workflow/src/client/schemas/collection';
+import { useAPIClient } from '@nocobase/client';
+import { InAppMessagesDefinition } from '../../types';
 
 export const InboxContent = ({
   groups,
@@ -29,6 +30,12 @@ export const InboxContent = ({
 }) => {
   const [selectedGroupId, setSelectedGroupId] = useState<string>(null);
   const selectedGroup = groupMap[selectedGroupId];
+  const apiClient = useAPIClient();
+  const readMessage = useCallback(async (params: Record<string, any>) => {
+    apiClient.request({
+      resource: 'messages',
+    });
+  }, []);
   const messages = useMemo(() => {
     if (!selectedGroupId) {
       return [];
@@ -90,7 +97,31 @@ export const InboxContent = ({
         </Typography.Title>
 
         {messages.map((message, index) => (
-          <Card size={'small'} style={{ marginTop: 24 }} title={message.title} key={message.id}>
+          <Card
+            size={'small'}
+            style={{ marginTop: 24 }}
+            title={<span style={{ fontWeight: message.status === 'unread' ? 'bold' : 'normal' }}>{message.title}</span>}
+            extra={
+              <Button
+                onClick={() => {
+                  apiClient.request({
+                    resource: InAppMessagesDefinition.name,
+                    action: 'update',
+                    method: 'post',
+                    params: {
+                      filterByTk: message.id,
+                      values: {
+                        status: 'read',
+                      },
+                    },
+                  });
+                }}
+              >
+                Detail
+              </Button>
+            }
+            key={message.id}
+          >
             <Descriptions key={index} column={1}>
               <Descriptions.Item label="内容">{message.content}</Descriptions.Item>
               <Descriptions.Item label="时间">
@@ -99,7 +130,9 @@ export const InboxContent = ({
             </Descriptions>
           </Card>
         ))}
-        <Button onClick={onLoadMessagesMore}>Load more</Button>
+        <Button style={{ margin: '20px auto 0 auto', display: 'block' }} onClick={onLoadMessagesMore}>
+          Load more
+        </Button>
       </>
     );
   };
