@@ -222,6 +222,15 @@ export default class NotificationServer extends NotificationServerBase {
                                   FROM ${InAppMessagesDefinition.name} AS messages
                                   WHERE
                                       messages.chatId = ${ChatsDefinition.name}.id
+                              )`),
+                      'totalMsgCnt',
+                    ],
+                    [
+                      Sequelize.literal(`(
+                                  SELECT COUNT(*)
+                                  FROM ${InAppMessagesDefinition.name} AS messages
+                                  WHERE
+                                      messages.chatId = ${ChatsDefinition.name}.id
                                       AND
                                       messages.status = "unread"
                               )`),

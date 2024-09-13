@@ -21,6 +21,7 @@ import {
   channelMapObs,
   fetchMessages,
   selectedMessageListObs,
+  showMsgLoadingMoreObs,
 } from '../observables';
 
 const InnerInboxContent = () => {
@@ -86,6 +87,7 @@ const InnerInboxContent = () => {
             title={<span style={{ fontWeight: message.status === 'unread' ? 'bold' : 'normal' }}>{message.title}</span>}
             extra={
               <Button
+                type="link"
                 onClick={() => {
                   apiClient.request({
                     resource: InAppMessagesDefinition.name,
@@ -113,9 +115,11 @@ const InnerInboxContent = () => {
             </Descriptions>
           </Card>
         ))}
-        <Button style={{ margin: '20px auto 0 auto', display: 'block' }} onClick={onLoadMessagesMore}>
-          Load more
-        </Button>
+        {showMsgLoadingMoreObs.value && (
+          <Button style={{ margin: '20px auto 0 auto', display: 'block' }} onClick={onLoadMessagesMore}>
+            Loading more
+          </Button>
+        )}
       </>
     );
   };

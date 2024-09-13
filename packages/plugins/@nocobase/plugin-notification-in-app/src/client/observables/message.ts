@@ -10,7 +10,7 @@
 import { observable, autorun } from '@formily/reactive';
 import { Message } from '../../types';
 import { getAPIClient } from '.';
-import { selectedChannelIdObs } from './channel';
+import { channelMapObs, selectedChannelIdObs } from './channel';
 import { InAppMessagesDefinition } from '../../types';
 
 export const messageMapObs = observable<{ value: Record<string, Message> }>({ value: {} });
@@ -69,4 +69,14 @@ export const updateUnreadMsgsCount = async () => {
   unreadMsgsCountObs.value = res?.data?.data.count;
 };
 
-const createSSEConnection = () => {};
+export const showMsgLoadingMoreObs = observable.computed(() => {
+  const selectedChannelId = selectedChannelIdObs.value;
+  const selectedChannel = channelMapObs.value[selectedChannelIdObs.value];
+  const selectedMessageList = selectedMessageListObs.value;
+  const isMoreMessage = selectedChannel.totalMsgCnt > selectedMessageList.length;
+  if (selectedChannelId && isMoreMessage) {
+    return true;
+  } else {
+    return false;
+  }
+}) as { value: boolean };

@@ -23,6 +23,7 @@ export interface Channel {
   title: string;
   userId: string;
   unreadMsgCnt: number;
+  totalMsgCnt: number;
   latestMsgReceiveTimestamp: number;
   latestMsgTitle: string;
 }
