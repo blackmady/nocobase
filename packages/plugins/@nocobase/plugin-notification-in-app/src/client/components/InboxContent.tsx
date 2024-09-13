@@ -9,7 +9,7 @@
 
 import React, { useCallback } from 'react';
 import { observer } from '@formily/reactive-react';
-import { Layout, List, Card, Descriptions, Typography, Badge, Button, Flex } from 'antd';
+import { Layout, List, Card, Descriptions, Typography, Badge, Button, Flex, Spin } from 'antd';
 import { css } from '@emotion/css';
 import { dayjs } from '@nocobase/utils/client';
 import { useAPIClient } from '@nocobase/client';
@@ -18,8 +18,10 @@ import {
   fetchChannels,
   selectedChannelIdObs,
   channelListObs,
+  isFetchingChannelsObs,
   channelMapObs,
   fetchMessages,
+  isFecthingMessageObs,
   selectedMessageListObs,
   showMsgLoadingMoreObs,
 } from '../observables';
@@ -60,69 +62,79 @@ const InnerInboxContent = () => {
     fetchMessages({ filter, limit: 30 });
   }, [messages, selectedChannelId]);
 
-  const loadChannelsMore = (
-    <div
-      style={{
-        textAlign: 'center',
-        marginTop: 12,
-        height: 32,
-        lineHeight: '32px',
-      }}
-    >
-      <Button onClick={onLoadChannelsMore}>Loading more</Button>
-    </div>
-  );
+  const loadChannelsMore =
+    channels.length > 0 ? (
+      <div
+        style={{
+          textAlign: 'center',
+          marginTop: 12,
+          height: 32,
+          lineHeight: '32px',
+        }}
+      >
+        <Button loading={isFetchingChannelsObs.value} onClick={onLoadChannelsMore}>
+          Loading more
+        </Button>
+      </div>
+    ) : null;
 
-  const MessageList = () => {
+  const MessageList = observer(() => {
+    const isFetchingMessages = isFecthingMessageObs.value;
     return (
       <>
         <Typography.Title level={4} style={{ marginTop: 12 }}>
           {channelMapObs.value[selectedChannelId].title}
         </Typography.Title>
 
-        {messages.map((message, index) => (
-          <Card
-            size={'small'}
-            style={{ marginTop: 24 }}
-            title={<span style={{ fontWeight: message.status === 'unread' ? 'bold' : 'normal' }}>{message.title}</span>}
-            extra={
-              <Button
-                type="link"
-                onClick={() => {
-                  apiClient.request({
-                    resource: InAppMessagesDefinition.name,
-                    action: 'update',
-                    method: 'post',
-                    params: {
-                      filterByTk: message.id,
-                      values: {
-                        status: 'read',
+        {messages.length === 0 && isFecthingMessageObs.value ? (
+          <Spin />
+        ) : (
+          messages.map((message, index) => (
+            <Card
+              size={'small'}
+              style={{ marginTop: 24 }}
+              title={
+                <span style={{ fontWeight: message.status === 'unread' ? 'bold' : 'normal' }}>{message.title}</span>
+              }
+              extra={
+                <Button
+                  type="link"
+                  onClick={() => {
+                    apiClient.request({
+                      resource: InAppMessagesDefinition.name,
+                      action: 'update',
+                      method: 'post',
+                      params: {
+                        filterByTk: message.id,
+                        values: {
+                          status: 'read',
+                        },
                       },
-                    },
-                  });
-                }}
-              >
-                Detail
-              </Button>
-            }
-            key={message.id}
-          >
-            <Descriptions key={index} column={1}>
-              <Descriptions.Item label="内容">{message.content}</Descriptions.Item>
-              <Descriptions.Item label="时间">
-                {dayjs(message.receiveTimestamp).format('YYYY-MM-DD HH:mm:ss')}
-              </Descriptions.Item>
-            </Descriptions>
-          </Card>
-        ))}
+                    });
+                  }}
+                >
+                  Detail
+                </Button>
+              }
+              key={message.id}
+            >
+              <Descriptions key={index} column={1}>
+                <Descriptions.Item label="内容">{message.content}</Descriptions.Item>
+                <Descriptions.Item label="时间">
+                  {dayjs(message.receiveTimestamp).format('YYYY-MM-DD HH:mm:ss')}
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+          ))
+        )}
         {showMsgLoadingMoreObs.value && (
-          <Button style={{ margin: '20px auto 0 auto', display: 'block' }} onClick={onLoadMessagesMore}>
+          <Button style={{ margin: '20px auto 0 auto' }} onClick={onLoadMessagesMore} loading={isFetchingMessages}>
             Loading more
           </Button>
         )}
       </>
     );
-  };
+  });
 
   return (
     <Layout style={{ height: '100%' }}>
@@ -132,6 +144,7 @@ const InnerInboxContent = () => {
           dataSource={channels}
           loadMore={loadChannelsMore}
           style={{ paddingBottom: '20px' }}
+          loading={channels.length === 0 && isFetchingChannelsObs.value}
           renderItem={(item) => (
             <List.Item
               className={css`

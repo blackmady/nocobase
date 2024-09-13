@@ -14,6 +14,7 @@ import { channelMapObs, selectedChannelIdObs } from './channel';
 import { InAppMessagesDefinition } from '../../types';
 
 export const messageMapObs = observable<{ value: Record<string, Message> }>({ value: {} });
+export const isFecthingMessageObs = observable<{ value: boolean }>({ value: false });
 export const messageListObs = observable.computed(() => {
   return Object.values(messageMapObs.value).sort((a, b) => (a.receiveTimestamp > b.receiveTimestamp ? -1 : 1));
 }) as { value: Message[] };
@@ -28,6 +29,7 @@ export const selectedMessageListObs = observable.computed(() => {
 }) as { value: Message[] };
 
 export const fetchMessages = async (params: any = { limit: 30 }) => {
+  isFecthingMessageObs.value = true;
   const apiClient = getAPIClient();
   const res = await apiClient.request({
     url: 'myInSiteMessages:list',
@@ -40,6 +42,7 @@ export const fetchMessages = async (params: any = { limit: 30 }) => {
       messageMapObs.value[message.id] = message;
     });
   }
+  isFecthingMessageObs.value = false;
 };
 
 export const updateMessage = async (params: any) => {
@@ -74,7 +77,7 @@ export const showMsgLoadingMoreObs = observable.computed(() => {
   const selectedChannel = channelMapObs.value[selectedChannelIdObs.value];
   const selectedMessageList = selectedMessageListObs.value;
   const isMoreMessage = selectedChannel.totalMsgCnt > selectedMessageList.length;
-  if (selectedChannelId && isMoreMessage) {
+  if (selectedChannelId && isMoreMessage && selectedMessageList.length > 0) {
     return true;
   } else {
     return false;

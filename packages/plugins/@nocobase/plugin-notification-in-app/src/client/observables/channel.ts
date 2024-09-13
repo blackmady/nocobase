@@ -12,6 +12,8 @@ import { Channel, Message } from '../../types';
 import { getAPIClient } from '.';
 
 export const channelMapObs = observable<{ value: Record<string, Channel> }>({ value: {} });
+export const isFetchingChannelsObs = observable<{ value: boolean }>({ value: false });
+
 export const channelListObs = observable.computed(() => {
   const channels = Object.values(channelMapObs.value).sort((a, b) =>
     a.latestMsgReceiveTimestamp > b.latestMsgReceiveTimestamp ? -1 : 1,
@@ -23,6 +25,7 @@ export const selectedChannelIdObs = observable<{ value: string | null }>({ value
 
 export const fetchChannels = async (params: any) => {
   const apiClient = getAPIClient();
+  isFetchingChannelsObs.value = true;
   const res = await apiClient.request({
     url: 'myInSiteChats:list',
     method: 'get',
@@ -34,6 +37,7 @@ export const fetchChannels = async (params: any) => {
       channelMapObs.value[channel.id] = channel;
     });
   }
+  isFetchingChannelsObs.value = false;
 };
 
 autorun(() => {
