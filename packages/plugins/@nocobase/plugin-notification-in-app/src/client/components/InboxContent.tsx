@@ -14,6 +14,7 @@ import { css } from '@emotion/css';
 import { dayjs } from '@nocobase/utils/client';
 import { useAPIClient } from '@nocobase/client';
 import { InAppMessagesDefinition } from '../../types';
+import { useLocalTranslation } from '../../locale';
 import {
   fetchChannels,
   selectedChannelIdObs,
@@ -24,18 +25,15 @@ import {
   isFecthingMessageObs,
   selectedMessageListObs,
   showMsgLoadingMoreObs,
+  updateMessage,
 } from '../observables';
 
 const InnerInboxContent = () => {
   const apiClient = useAPIClient();
+  const { t } = useLocalTranslation();
   const channels = channelListObs.value;
   const messages = selectedMessageListObs.value;
   const selectedChannelId = selectedChannelIdObs.value;
-  const readMessage = useCallback(async (params: Record<string, any>) => {
-    apiClient.request({
-      resource: 'messages',
-    });
-  }, []);
 
   const onLoadChannelsMore = () => {
     const filter: Record<string, any> = {};
@@ -73,13 +71,17 @@ const InnerInboxContent = () => {
         }}
       >
         <Button loading={isFetchingChannelsObs.value} onClick={onLoadChannelsMore}>
-          Loading more
+          {t('Loading more')}
         </Button>
       </div>
     ) : null;
 
   const MessageList = observer(() => {
     const isFetchingMessages = isFecthingMessageObs.value;
+    const msgStatusDict = {
+      read: t('Read'),
+      unread: t('Unread'),
+    };
     return (
       <>
         <Typography.Title level={4} style={{ marginTop: 12 }}>
@@ -87,7 +89,7 @@ const InnerInboxContent = () => {
         </Typography.Title>
 
         {messages.length === 0 && isFecthingMessageObs.value ? (
-          <Spin />
+          <Spin style={{ width: '100%', marginTop: '80px' }} />
         ) : (
           messages.map((message, index) => (
             <Card
@@ -100,36 +102,32 @@ const InnerInboxContent = () => {
                 <Button
                   type="link"
                   onClick={() => {
-                    apiClient.request({
-                      resource: InAppMessagesDefinition.name,
-                      action: 'update',
-                      method: 'post',
-                      params: {
-                        filterByTk: message.id,
-                        values: {
-                          status: 'read',
-                        },
+                    updateMessage({
+                      filterByTk: message.id,
+                      values: {
+                        status: 'read',
                       },
                     });
                   }}
                 >
-                  Detail
+                  {t('Detail')}
                 </Button>
               }
               key={message.id}
             >
               <Descriptions key={index} column={1}>
-                <Descriptions.Item label="内容">{message.content}</Descriptions.Item>
-                <Descriptions.Item label="时间">
+                <Descriptions.Item label={t('Content')}>{message.content}</Descriptions.Item>
+                <Descriptions.Item label={t('Datetime')}>
                   {dayjs(message.receiveTimestamp).format('YYYY-MM-DD HH:mm:ss')}
                 </Descriptions.Item>
+                <Descriptions.Item label={t('Status')}>{msgStatusDict[message.status]}</Descriptions.Item>
               </Descriptions>
             </Card>
           ))
         )}
         {showMsgLoadingMoreObs.value && (
           <Button style={{ margin: '20px auto 0 auto' }} onClick={onLoadMessagesMore} loading={isFetchingMessages}>
-            Loading more
+            {t('Loading more')}
           </Button>
         )}
       </>

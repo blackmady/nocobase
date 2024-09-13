@@ -1,1 +1,10 @@
-{}
+{
+  "Inbox": "收信箱",
+  "Loading more": "加载更多",
+  "Detail": "详情",
+  "Content": "内容",
+  "Datetime": "时间",
+  "Status": "状态",
+  "Read": "已读",
+  "Unread": "未读"
+}

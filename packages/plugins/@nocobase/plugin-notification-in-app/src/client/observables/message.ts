@@ -48,11 +48,12 @@ export const fetchMessages = async (params: any = { limit: 30 }) => {
 export const updateMessage = async (params: any) => {
   const apiClient = getAPIClient();
   await apiClient.request({
-    url: 'myInSiteMessages:update',
+    resource: InAppMessagesDefinition.name,
+    action: 'update',
     method: 'post',
     params,
   });
-  messageMapObs.value[params.id] = { ...messageMapObs.value[params.id], ...params.values };
+  messageMapObs.value[params.filterByTk] = { ...messageMapObs.value[params.filterByTk], ...params.values };
 };
 
 autorun(() => {
