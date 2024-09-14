@@ -15,7 +15,7 @@ import { lang as t } from '../locale';
 import { ContentConfigForm } from './components/MessageConfigForm';
 import { MessageList } from './components/MessageList/index';
 export const NAMESPACE = 'inbox';
-import { setAPIClient } from './observables';
+import { setAPIClient } from './utils';
 export class PluginNotificationInAppClient extends Plugin {
   async afterAdd() {}
 

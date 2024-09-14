@@ -201,7 +201,7 @@ export default class NotificationServer extends NotificationServerBase {
         list: {
           handler: async (ctx) => {
             const userId = ctx.state.currentUser.id;
-            const { filter = {} } = ctx.action.params;
+            const { filter = {}, limit = 30 } = ctx.action.params;
             const conditions = [];
             if (filter?.latestMsgReceiveTimestamp?.$lt) {
               conditions.push(Sequelize.literal(`latestMsgReceiveTimestamp < ${filter.latestMsgReceiveTimestamp.$lt}`));
@@ -210,9 +210,8 @@ export default class NotificationServer extends NotificationServerBase {
 
             const chatsRepo = this.plugin.app.db.getRepository(ChatsDefinition.name);
             try {
-              const allChats = await chatsRepo.find({
-                logging: console.log,
-                limit: 30,
+              const channelsRes = chatsRepo.find({
+                limit,
                 filter,
                 attributes: {
                   include: [
@@ -265,7 +264,16 @@ export default class NotificationServer extends NotificationServerBase {
                   [Op.and]: conditions,
                 },
               });
-              ctx.body = { channels: allChats };
+
+              const countRes = chatsRepo.count({
+                logging: console.log,
+                filter: {
+                  userId,
+                },
+              });
+
+              const [channels, count] = await Promise.all([channelsRes, countRes]);
+              ctx.body = { rows: channels, count };
             } catch (error) {
               console.error(error);
             }

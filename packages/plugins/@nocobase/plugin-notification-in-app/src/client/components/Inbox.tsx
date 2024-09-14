@@ -26,7 +26,7 @@ import { useLocalTranslation } from '../../locale';
 import { SSEData } from '../../types/sse';
 import { fetchChannels } from '../observables';
 import { observer } from '@formily/reactive-react';
-import { updateUnreadMsgsCount, unreadMsgsCountObs, liveSSEObs } from '../observables';
+import { updateUnreadMsgsCount, unreadMsgsCountObs, liveSSEObs, createMsgSSEConnection } from '../observables';
 const useStyles = createStyles(({ token }) => {
   return {
     button: {
@@ -52,36 +52,8 @@ const InnerInbox = (props) => {
   }, []);
 
   useEffect(() => {
-    const request = async () => {
-      const res = await apiClient.request({
-        url: 'myInSiteMessages:sse',
-        method: 'get',
-        headers: {
-          Accept: 'text/event-stream',
-        },
-        params: {
-          id: crypto.randomUUID(),
-        },
-        responseType: 'stream',
-        adapter: 'fetch',
-      });
-      const stream = res.data;
-      const reader = stream.pipeThrough(new TextDecoderStream()).getReader();
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        try {
-          const { value, done } = await reader.read();
-          if (done) break;
-          const sseData: SSEData = JSON.parse(value.replace(/^data:\s*/, '').trim());
-          liveSSEObs.value = sseData;
-        } catch (error) {
-          console.error(error);
-          break;
-        }
-      }
-    };
-    request();
-  }, [apiClient]);
+    createMsgSSEConnection();
+  }, []);
 
   return (
     <ConfigProvider

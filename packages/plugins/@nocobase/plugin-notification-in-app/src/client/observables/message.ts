@@ -9,7 +9,7 @@
 
 import { observable, autorun } from '@formily/reactive';
 import { Message } from '../../types';
-import { getAPIClient } from '.';
+import { getAPIClient } from '../utils';
 import { channelMapObs, selectedChannelIdObs } from './channel';
 import { InAppMessagesDefinition } from '../../types';
 

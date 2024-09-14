@@ -21,6 +21,7 @@ import {
   channelListObs,
   isFetchingChannelsObs,
   channelMapObs,
+  showChannelLoadingMoreObs,
   fetchMessages,
   isFecthingMessageObs,
   selectedMessageListObs,
@@ -60,21 +61,20 @@ const InnerInboxContent = () => {
     fetchMessages({ filter, limit: 30 });
   }, [messages, selectedChannelId]);
 
-  const loadChannelsMore =
-    channels.length > 0 ? (
-      <div
-        style={{
-          textAlign: 'center',
-          marginTop: 12,
-          height: 32,
-          lineHeight: '32px',
-        }}
-      >
-        <Button loading={isFetchingChannelsObs.value} onClick={onLoadChannelsMore}>
-          {t('Loading more')}
-        </Button>
-      </div>
-    ) : null;
+  const loadChannelsMore = showChannelLoadingMoreObs.value ? (
+    <div
+      style={{
+        textAlign: 'center',
+        marginTop: 12,
+        height: 32,
+        lineHeight: '32px',
+      }}
+    >
+      <Button loading={isFetchingChannelsObs.value} onClick={onLoadChannelsMore}>
+        {t('Loading more')}
+      </Button>
+    </div>
+  ) : null;
 
   const MessageList = observer(() => {
     const isFetchingMessages = isFecthingMessageObs.value;

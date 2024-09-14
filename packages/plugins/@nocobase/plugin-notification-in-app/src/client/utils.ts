@@ -7,6 +7,9 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
-export * from './channel';
-export * from './message';
-export * from './sse';
+import { APIClient } from '@nocobase/client';
+let apiClient: APIClient;
+export const setAPIClient = (apiClientTarget: APIClient) => {
+  apiClient = apiClientTarget;
+};
+export const getAPIClient = () => apiClient;
