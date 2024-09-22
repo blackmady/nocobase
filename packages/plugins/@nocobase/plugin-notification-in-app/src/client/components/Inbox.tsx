@@ -23,10 +23,9 @@ import { Icon } from '@nocobase/client';
 import { useAPIClient } from '@nocobase/client';
 import { InboxContent } from './InboxContent';
 import { useLocalTranslation } from '../../locale';
-import { SSEData } from '../../types/sse';
 import { fetchChannels } from '../observables';
 import { observer } from '@formily/reactive-react';
-import { updateUnreadMsgsCount, unreadMsgsCountObs, liveSSEObs, createMsgSSEConnection } from '../observables';
+import { updateUnreadMsgsCount, unreadMsgsCountObs, createMsgSSEConnection, inboxVisible } from '../observables';
 const useStyles = createStyles(({ token }) => {
   return {
     button: {
@@ -47,7 +46,7 @@ const InnerInbox = (props) => {
   }, []);
 
   const onIconClick = useCallback(() => {
-    setVisible(true);
+    inboxVisible.value = true;
     fetchChannels({});
   }, []);
 
@@ -63,7 +62,15 @@ const InnerInbox = (props) => {
     >
       <Button className={styles.button} title={'Apps'} icon={<Icon type={'MailOutlined'} />} onClick={onIconClick} />
       {unreadMsgsCountObs.value && <Badge count={unreadMsgsCountObs.value} size="small" offset={[-18, -16]}></Badge>}
-      <Drawer title={t('Inbox')} open={visible} closeIcon={true} width={800} onClose={() => setVisible(false)}>
+      <Drawer
+        title={t('Inbox')}
+        open={inboxVisible.value}
+        closeIcon={true}
+        width={800}
+        onClose={() => {
+          inboxVisible.value = false;
+        }}
+      >
         <InboxContent />
       </Drawer>
     </ConfigProvider>

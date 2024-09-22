@@ -8,7 +8,7 @@
  */
 
 import { observable, autorun } from '@formily/reactive';
-import { Channel, ChatsDefinition, Message } from '../../types';
+import { Channel } from '../../types';
 import { getAPIClient } from '../utils';
 
 export const channelMapObs = observable<{ value: Record<string, Channel> }>({ value: {} });

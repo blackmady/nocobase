@@ -36,6 +36,7 @@ export interface Message {
   content: string;
   receiveTimestamp: number;
   status: 'read' | 'unread';
+  url: string;
 }
 
 export type SSEData = {

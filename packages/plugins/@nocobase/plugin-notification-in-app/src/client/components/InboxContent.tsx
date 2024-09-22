@@ -12,9 +12,9 @@ import { observer } from '@formily/reactive-react';
 import { Layout, List, Card, Descriptions, Typography, Badge, Button, Flex, Spin, Tag } from 'antd';
 import { css } from '@emotion/css';
 import { dayjs } from '@nocobase/utils/client';
-import { useAPIClient } from '@nocobase/client';
-import { InAppMessagesDefinition } from '../../types';
+import { useNavigate } from 'react-router-dom';
 import { useLocalTranslation } from '../../locale';
+
 import {
   fetchChannels,
   selectedChannelIdObs,
@@ -27,10 +27,10 @@ import {
   selectedMessageListObs,
   showMsgLoadingMoreObs,
   updateMessage,
+  inboxVisible,
 } from '../observables';
 
 const InnerInboxContent = () => {
-  const apiClient = useAPIClient();
   const { t } = useLocalTranslation();
   const channels = channelListObs.value;
   const messages = selectedMessageListObs.value;
@@ -77,6 +77,8 @@ const InnerInboxContent = () => {
   ) : null;
 
   const MessageList = observer(() => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const navigate = useNavigate();
     const isFetchingMessages = isFecthingMessageObs.value;
     const msgStatusDict = {
       read: t('Read'),
@@ -94,10 +96,18 @@ const InnerInboxContent = () => {
           messages.map((message, index) => (
             <Card
               size={'small'}
-              style={{ marginTop: 24 }}
+              style={{ marginTop: 24, cursor: 'pointer' }}
               title={
                 <span style={{ fontWeight: message.status === 'unread' ? 'bold' : 'normal' }}>{message.title}</span>
               }
+              onClick={() => {
+                updateMessage({
+                  filterByTk: message.id,
+                  values: {
+                    status: 'read',
+                  },
+                });
+              }}
               extra={
                 <Button
                   type="link"
@@ -108,6 +118,8 @@ const InnerInboxContent = () => {
                         status: 'read',
                       },
                     });
+                    navigate('/admin/78pwn4k87xo');
+                    inboxVisible.value = false;
                   }}
                 >
                   {t('Detail')}

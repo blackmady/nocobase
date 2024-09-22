@@ -7,7 +7,6 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
-export * from './channel';
-export * from './message';
-export * from './sse';
-export * from './inbox';
+import { observable } from '@formily/reactive';
+
+export const inboxVisible = observable<{ value: boolean }>({ value: false });
