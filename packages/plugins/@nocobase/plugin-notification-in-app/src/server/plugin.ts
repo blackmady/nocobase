@@ -22,7 +22,7 @@ export class PluginNotificationInAppServer extends Plugin {
     inSiteServer.defineActions();
 
     const notificationServer = this.pm.get(NotificationsServerPlugin) as NotificationsServerPlugin;
-    notificationServer.notificationManager.registerTypes(inAppTypeName, {
+    notificationServer.manager.registerTypes(inAppTypeName, {
       server: inSiteServer,
     });
   }

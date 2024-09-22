@@ -75,14 +75,13 @@ export default class NotificationServer extends NotificationServerBase {
 
   send: SendFnType<InAppMessageFormValues> = async (options) => {
     const { message } = options;
-    const { content, receivers } = message;
-    const { title, senderId, senderName } = content.config;
+    const { content, receivers, title, senderId, senderName } = message;
 
     await Promise.all(
       receivers.map(async (userId) => {
         const message = await this.saveMessageToDB({
           title,
-          content: content.body,
+          content,
           senderName,
           senderId,
           status: 'unread',
@@ -100,7 +99,7 @@ export default class NotificationServer extends NotificationServerBase {
     );
     // 测试用
     // await this.mockMessages();
-    return { status: 'success', receivers, content: content.body, title };
+    return { status: 'success', message };
   };
 
   mockMessages = async () => {
@@ -200,9 +199,10 @@ export default class NotificationServer extends NotificationServerBase {
       actions: {
         list: {
           handler: async (ctx) => {
-            const userId = ctx.state.currentUser.id;
             const { filter = {}, limit = 30 } = ctx.action.params;
+            const userId = ctx.state.currentUser.id;
             const conditions = [];
+            if (userId) conditions.push({ userId });
             if (filter?.latestMsgReceiveTimestamp?.$lt) {
               conditions.push(Sequelize.literal(`latestMsgReceiveTimestamp < ${filter.latestMsgReceiveTimestamp.$lt}`));
             }

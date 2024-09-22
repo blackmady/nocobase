@@ -9,7 +9,7 @@
 
 import React, { useCallback } from 'react';
 import { observer } from '@formily/reactive-react';
-import { Layout, List, Card, Descriptions, Typography, Badge, Button, Flex, Spin } from 'antd';
+import { Layout, List, Card, Descriptions, Typography, Badge, Button, Flex, Spin, Tag } from 'antd';
 import { css } from '@emotion/css';
 import { dayjs } from '@nocobase/utils/client';
 import { useAPIClient } from '@nocobase/client';
@@ -120,7 +120,9 @@ const InnerInboxContent = () => {
                 <Descriptions.Item label={t('Datetime')}>
                   {dayjs(message.receiveTimestamp).format('YYYY-MM-DD HH:mm:ss')}
                 </Descriptions.Item>
-                <Descriptions.Item label={t('Status')}>{msgStatusDict[message.status]}</Descriptions.Item>
+                <Descriptions.Item label={t('Status')}>
+                  <Tag>{msgStatusDict[message.status]}</Tag>
+                </Descriptions.Item>
               </Descriptions>
             </Card>
           ))

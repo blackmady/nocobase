@@ -43,9 +43,12 @@ export type SSEData = {
   data: Message;
 };
 export interface InAppMessageFormValues {
-  content: Record<string, any>;
+  receivers: string[];
+  content: string;
   senderName: string;
   senderId: string;
+  url: string;
+  title: string;
 }
 
 export const InAppMessagesDefinition = {

@@ -10,6 +10,8 @@
 import React from 'react';
 import { SchemaComponent, css } from '@nocobase/client';
 import { useLocalTranslation } from '../../locale';
+import { UsersSelect } from './UsersSelect';
+import { UsersAddition } from './UsersAddition';
 
 const emailsClass = css`
   width: 100%;
@@ -18,15 +20,61 @@ const emailsClass = css`
     flex-grow: 1;
   }
 `;
-export const ContentConfigForm = ({ variableOptions }) => {
+export const MessageConfigForm = ({ variableOptions }) => {
   const { t } = useLocalTranslation();
   return (
     <SchemaComponent
       scope={{ t }}
+      components={{ UsersSelect, UsersAddition }}
       schema={{
         type: 'void',
-
         properties: {
+          receivers: {
+            type: 'array',
+            title: `{{t("Receivers")}}`,
+            'x-decorator': 'FormItem',
+            'x-component': 'ArrayItems',
+            items: {
+              type: 'void',
+              'x-component': 'Space',
+              'x-component-props': {
+                className: css`
+                  width: 100%;
+                  &.ant-space.ant-space-horizontal {
+                    flex-wrap: nowrap;
+                  }
+                  > .ant-space-item:nth-child(2) {
+                    flex-grow: 1;
+                  }
+                `,
+              },
+              properties: {
+                sort: {
+                  type: 'void',
+                  'x-decorator': 'FormItem',
+                  'x-component': 'ArrayItems.SortHandle',
+                },
+                input: {
+                  type: 'string',
+                  'x-decorator': 'FormItem',
+                  'x-component': 'UsersSelect',
+                },
+                remove: {
+                  type: 'void',
+                  'x-decorator': 'FormItem',
+                  'x-component': 'ArrayItems.Remove',
+                },
+              },
+            },
+            required: true,
+            properties: {
+              add: {
+                type: 'void',
+                title: `{{t("Add receiver")}}`,
+                'x-component': 'UsersAddition',
+              },
+            },
+          },
           senderName: {
             type: 'string',
             required: true,
@@ -47,6 +95,20 @@ export const ContentConfigForm = ({ variableOptions }) => {
             'x-component-props': {
               scope: variableOptions,
               useTypedConstant: ['string'],
+            },
+          },
+          content: {
+            type: 'string',
+            required: true,
+            title: `{{t("Content")}}`,
+            'x-decorator': 'FormItem',
+            'x-component': 'Variable.RawTextArea',
+            'x-component-props': {
+              scope: variableOptions,
+              placeholder: 'Hi,',
+              autoSize: {
+                minRows: 10,
+              },
             },
           },
           url: {
