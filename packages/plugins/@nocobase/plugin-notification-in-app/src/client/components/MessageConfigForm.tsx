@@ -80,7 +80,7 @@ export const MessageConfigForm = ({ variableOptions }) => {
             required: true,
             title: `{{t("Sender name")}}`,
             'x-decorator': 'FormItem',
-            'x-component': 'Variable.Input',
+            'x-component': 'Variable.TextArea',
             'x-component-props': {
               scope: variableOptions,
               useTypedConstant: ['string'],
@@ -91,7 +91,7 @@ export const MessageConfigForm = ({ variableOptions }) => {
             required: true,
             title: `{{t("Title")}}`,
             'x-decorator': 'FormItem',
-            'x-component': 'Variable.Input',
+            'x-component': 'Variable.TextArea',
             'x-component-props': {
               scope: variableOptions,
               useTypedConstant: ['string'],
@@ -102,7 +102,7 @@ export const MessageConfigForm = ({ variableOptions }) => {
             required: true,
             title: `{{t("Content")}}`,
             'x-decorator': 'FormItem',
-            'x-component': 'Variable.RawTextArea',
+            'x-component': 'Variable.TextArea',
             'x-component-props': {
               scope: variableOptions,
               placeholder: 'Hi,',

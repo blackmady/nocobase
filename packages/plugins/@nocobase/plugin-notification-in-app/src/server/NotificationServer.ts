@@ -15,6 +15,7 @@ import { InAppMessagesDefinition, ChatsDefinition } from '../types';
 import { FindAttributeOptions, ModelStatic, Op, Sequelize, WhereOptions } from 'sequelize';
 import { randomUUID } from 'crypto';
 import { uid } from '@nocobase/utils';
+import { parseUserSelectionConf } from './parseUserSelectionConf';
 
 type UserID = string;
 type ClientID = string;
@@ -75,7 +76,9 @@ export default class NotificationServer extends NotificationServerBase {
 
   send: SendFnType<InAppMessageFormValues> = async (options) => {
     const { message } = options;
-    const { content, receivers, title, senderId, senderName } = message;
+    const { content, receivers: userSelectionConfig, title, senderId, senderName } = message;
+    const userRepo = this.plugin.app.db.getRepository('users');
+    const receivers = await parseUserSelectionConf(userSelectionConfig, userRepo);
 
     await Promise.all(
       receivers.map(async (userId) => {
