@@ -207,6 +207,9 @@ export default class NotificationServer extends NotificationServerBase {
             const messagesTableName = messagesCollection.getRealTableName(true);
             const channelsCollection = this.plugin.app.db.getCollection(ChannelsDefinition.name);
             const channelsTableName = channelsCollection.getRealTableName(true);
+            const channelsTableAliasName = this.plugin.app.db.sequelize
+              .getQueryInterface()
+              .quoteIdentifier(channelsCollection.name);
             const userId = ctx.state.currentUser.id;
             const conditions: any[] = [];
             if (userId) conditions.push({ userId });
@@ -237,7 +240,7 @@ export default class NotificationServer extends NotificationServerBase {
                                   SELECT COUNT(*)
                                   FROM ${messagesTableName} AS messages
                                   WHERE
-                                      messages.${messagesFieldName.channelId} = ${channelsTableName}.id
+                                      messages.${messagesFieldName.channelId} = ${channelsTableAliasName}.id
                               )`),
                       'totalMsgCnt',
                     ],
@@ -246,7 +249,7 @@ export default class NotificationServer extends NotificationServerBase {
                                   SELECT COUNT(*)
                                   FROM ${messagesTableName} AS messages
                                   WHERE
-                                      messages.${messagesFieldName.channelId} = ${channelsTableName}.id
+                                      messages.${messagesFieldName.channelId} = ${channelsTableAliasName}.id
                                       AND
                                       messages.${messagesFieldName.status} = 'unread'
                               )`),
@@ -257,7 +260,7 @@ export default class NotificationServer extends NotificationServerBase {
                                   SELECT messages.${messagesFieldName.receiveTimestamp}
                                   FROM ${messagesTableName} AS messages
                                   WHERE
-                                      messages.${messagesFieldName.channelId} = ${channelsTableName}.id
+                                      messages.${messagesFieldName.channelId} = ${channelsTableAliasName}.id
                                   ORDER BY messages.${messagesFieldName.receiveTimestamp} DESC
                                   LIMIT 1
                               )`),
@@ -268,7 +271,7 @@ export default class NotificationServer extends NotificationServerBase {
                         SELECT messages.${messagesFieldName.title}
                                 FROM ${messagesTableName} AS messages
                                 WHERE
-                                    messages.${messagesFieldName.channelId} = ${channelsTableName}.id
+                                    messages.${messagesFieldName.channelId} = ${channelsTableAliasName}.id
                                 ORDER BY messages.${messagesFieldName.receiveTimestamp} DESC
                                 LIMIT 1
                     )`),
