@@ -1,1 +1,12 @@
-{}
+{
+  "Inbox": "Inbox",
+  "Loading more": "Loading more",
+  "Detail": "Detail",
+  "Content": "Content",
+  "Datetime": "Datetime",
+  "Status": "Status",
+  "Read": "Read",
+  "Unread": "Unread",
+  "In-app message": "In-app message"
+}
+

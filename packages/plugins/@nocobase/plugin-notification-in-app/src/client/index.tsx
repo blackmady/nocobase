@@ -12,7 +12,7 @@ import { MessageManagerProvider } from './MessageManagerProvider';
 import NotificationManager from '@nocobase/plugin-notification-manager/client';
 import { tval } from '@nocobase/utils/client';
 import { MessageConfigForm } from './components/MessageConfigForm';
-export const NAMESPACE = 'inbox';
+import { NAMESPACE } from '../locale';
 import { setAPIClient } from './utils';
 export class PluginNotificationInAppClient extends Plugin {
   async afterAdd() {}

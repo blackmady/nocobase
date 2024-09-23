@@ -10,8 +10,10 @@
 import { Plugin } from '@nocobase/server';
 import { COLLECTION_NAME } from '@nocobase/plugin-notification-manager';
 import { inAppTypeName } from '../types';
-import NotificationsServerPlugin, { SendFnType, NotificationServerBase } from '@nocobase/plugin-notification-manager';
+import NotificationsServerPlugin from '@nocobase/plugin-notification-manager';
 import NotificationInSiteServer from './NotificationServer';
+
+const NAMESPACE = 'notification-in-app';
 export class PluginNotificationInAppServer extends Plugin {
   async afterAdd() {}
 
@@ -32,7 +34,12 @@ export class PluginNotificationInAppServer extends Plugin {
     const channel = await channelsRepo.findOne({ filter: { notificationType: inAppTypeName } });
     if (!channel) {
       await channelsRepo.create({
-        values: { name: inAppTypeName, title: '站内信', notificationType: inAppTypeName, description: '站内信' },
+        values: {
+          name: inAppTypeName,
+          title: `{{t("In-app message", { ns: "${NAMESPACE}" })}}`,
+          notificationType: inAppTypeName,
+          description: `{{t("In-app message", { ns: "${NAMESPACE}" })}}`,
+        },
       });
     }
   }

@@ -6,5 +6,6 @@
   "Datetime": "时间",
   "Status": "状态",
   "Read": "已读",
-  "Unread": "未读"
+  "Unread": "未读",
+  "In-app message": "站内信"
 }
