@@ -142,7 +142,7 @@ export default class NotificationServer extends NotificationServerBase {
       actions: {
         sse: {
           handler: async (ctx, next) => {
-            const userId = ctx.state.currentUser.id;
+            const userId = String(ctx.state.currentUser.id);
             const clientId = ctx.action.params.id;
             ctx.request.socket.setTimeout(0);
             ctx.req.socket.setNoDelay(true);
@@ -162,7 +162,7 @@ export default class NotificationServer extends NotificationServerBase {
         },
         count: {
           handler: async (ctx) => {
-            const userId = ctx.state.currentUser.id;
+            const userId = String(ctx.state.currentUser.id);
             const status = ctx.action.params.status;
             const messages = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
             const count = await messages.count({ filter: { userId, status: 'unread' } });
@@ -171,6 +171,7 @@ export default class NotificationServer extends NotificationServerBase {
         },
         list: {
           handler: async (ctx) => {
+            const userId = String(ctx.state.currentUser.id);
             const messagesRepo = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
             const { filter = {} } = ctx.action.params;
             const messageList = await messagesRepo.find({
@@ -179,7 +180,7 @@ export default class NotificationServer extends NotificationServerBase {
               ...ctx.action.params,
               filter: {
                 ...filter,
-                userId: ctx.state.currentUser.id,
+                userId,
               },
               sort: '-receiveTimestamp',
             });
@@ -188,7 +189,7 @@ export default class NotificationServer extends NotificationServerBase {
         },
         update: {
           handler: async (ctx) => {
-            const userId = ctx.state.currentUser.id;
+            const userId = String(ctx.state.currentUser.id);
             const status = ctx.action.params.status;
             const messages = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
             const count = await messages.count({ filter: { userId, status: 'unread' } });
@@ -203,7 +204,7 @@ export default class NotificationServer extends NotificationServerBase {
         list: {
           handler: async (ctx) => {
             const { filter = {}, limit = 30 } = ctx.action.params;
-            const userId = ctx.state.currentUser.id;
+            const userId = String(ctx.state.currentUser.id);
             const conditions = [];
             if (userId) conditions.push({ userId });
             if (filter?.latestMsgReceiveTimestamp?.$lt) {
