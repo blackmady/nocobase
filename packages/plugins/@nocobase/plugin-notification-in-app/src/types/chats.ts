@@ -41,9 +41,9 @@ export const chatsCollection: CollectionOptions = {
     },
     {
       name: 'userId',
-      type: 'string',
+      type: 'bigInt',
       uiSchema: {
-        type: 'string',
+        type: 'number',
         'x-component': 'Input',
         title: '{{t("User ID")}}',
         required: true,

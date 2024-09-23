@@ -142,7 +142,7 @@ export default class NotificationServer extends NotificationServerBase {
       actions: {
         sse: {
           handler: async (ctx, next) => {
-            const userId = String(ctx.state.currentUser.id);
+            const userId = ctx.state.currentUser.id;
             const clientId = ctx.action.params.id;
             ctx.request.socket.setTimeout(0);
             ctx.req.socket.setNoDelay(true);
@@ -162,7 +162,7 @@ export default class NotificationServer extends NotificationServerBase {
         },
         count: {
           handler: async (ctx) => {
-            const userId = String(ctx.state.currentUser.id);
+            const userId = ctx.state.currentUser.id;
             const status = ctx.action.params.status;
             const messages = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
             const count = await messages.count({ filter: { userId, status: 'unread' } });
@@ -171,7 +171,7 @@ export default class NotificationServer extends NotificationServerBase {
         },
         list: {
           handler: async (ctx) => {
-            const userId = String(ctx.state.currentUser.id);
+            const userId = ctx.state.currentUser.id;
             const messagesRepo = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
             const { filter = {} } = ctx.action.params;
             const messageList = await messagesRepo.find({
@@ -189,7 +189,7 @@ export default class NotificationServer extends NotificationServerBase {
         },
         update: {
           handler: async (ctx) => {
-            const userId = String(ctx.state.currentUser.id);
+            const userId = ctx.state.currentUser.id;
             const status = ctx.action.params.status;
             const messages = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
             const count = await messages.count({ filter: { userId, status: 'unread' } });
@@ -204,7 +204,7 @@ export default class NotificationServer extends NotificationServerBase {
         list: {
           handler: async (ctx) => {
             const { filter = {}, limit = 30 } = ctx.action.params;
-            const userId = String(ctx.state.currentUser.id);
+            const userId = ctx.state.currentUser.id;
             const conditions = [];
             if (userId) conditions.push({ userId });
             if (filter?.latestMsgReceiveTimestamp?.$lt) {
@@ -222,41 +222,41 @@ export default class NotificationServer extends NotificationServerBase {
                     [
                       Sequelize.literal(`(
                                   SELECT COUNT(*)
-                                  FROM ${InAppMessagesDefinition.name} AS messages
+                                  FROM "${InAppMessagesDefinition.name}" AS messages
                                   WHERE
-                                      messages.chatId = ${ChatsDefinition.name}.id
+                                      messages."chatId" = "${ChatsDefinition.name}".id
                               )`),
                       'totalMsgCnt',
                     ],
                     [
                       Sequelize.literal(`(
                                   SELECT COUNT(*)
-                                  FROM ${InAppMessagesDefinition.name} AS messages
+                                  FROM "${InAppMessagesDefinition.name}" AS messages
                                   WHERE
-                                      messages.chatId = ${ChatsDefinition.name}.id
+                                      messages."chatId" = "${ChatsDefinition.name}".id
                                       AND
-                                      messages.status = "unread"
+                                      messages."status" = 'unread'
                               )`),
                       'unreadMsgCnt',
                     ],
                     [
                       Sequelize.literal(`(
-                                  SELECT messages.receiveTimestamp
-                                  FROM ${InAppMessagesDefinition.name} AS messages
+                                  SELECT messages."receiveTimestamp"
+                                  FROM "${InAppMessagesDefinition.name}" AS messages
                                   WHERE
-                                      messages.chatId = ${ChatsDefinition.name}.id
-                                  ORDER BY messages.receiveTimestamp DESC
+                                      messages."chatId" = "${ChatsDefinition.name}".id
+                                  ORDER BY messages."receiveTimestamp" DESC
                                   LIMIT 1
                               )`),
                       'latestMsgReceiveTimestamp',
                     ],
                     [
                       Sequelize.literal(`(
-                        SELECT messages.title
-                                FROM ${InAppMessagesDefinition.name} AS messages
+                        SELECT messages."title"
+                                FROM "${InAppMessagesDefinition.name}" AS messages
                                 WHERE
-                                    messages.chatId = ${ChatsDefinition.name}.id
-                                ORDER BY messages.receiveTimestamp DESC
+                                    messages."chatId" = "${ChatsDefinition.name}".id
+                                ORDER BY messages."receiveTimestamp" DESC
                                 LIMIT 1
                     )`),
                       'latestMsgTitle',
