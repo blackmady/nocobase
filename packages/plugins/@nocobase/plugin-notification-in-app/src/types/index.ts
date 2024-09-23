@@ -60,6 +60,8 @@ export const InAppMessagesDefinition = {
     userId: 'userId',
     content: 'content',
     status: 'status',
+    title: 'title',
+    receiveTimestamp: 'receiveTimestamp',
   },
 } as const;
 

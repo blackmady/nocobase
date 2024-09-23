@@ -11,8 +11,8 @@ import { SendFnType, NotificationServerBase } from '@nocobase/plugin-notificatio
 import { InAppMessageFormValues } from '../types';
 import { PassThrough } from 'stream';
 import PluginNotificationInAppServer from './plugin';
-import { InAppMessagesDefinition, ChatsDefinition } from '../types';
-import { FindAttributeOptions, ModelStatic, Op, Sequelize, WhereOptions } from 'sequelize';
+import { InAppMessagesDefinition as MessagesDefinition, ChatsDefinition as ChannelsDefinition } from '../types';
+import { Op, Sequelize } from 'sequelize';
 import { randomUUID } from 'crypto';
 import { uid } from '@nocobase/utils';
 import { parseUserSelectionConf } from './parseUserSelectionConf';
@@ -53,8 +53,8 @@ export default class NotificationServer extends NotificationServerBase {
     status: 'read' | 'unread';
     receiveTimestamp?: number;
   }): Promise<any> => {
-    const chatsRepo = this.plugin.app.db.getRepository(ChatsDefinition.name);
-    const messagesRepo = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
+    const chatsRepo = this.plugin.app.db.getRepository(ChannelsDefinition.name);
+    const messagesRepo = this.plugin.app.db.getRepository(MessagesDefinition.name);
     let chat = await chatsRepo.findOne({ filter: { senderId, userId } });
     if (!chat) {
       chat = await chatsRepo.create({ values: { senderId, userId, title: senderName } });
@@ -143,7 +143,8 @@ export default class NotificationServer extends NotificationServerBase {
         sse: {
           handler: async (ctx, next) => {
             const userId = ctx.state.currentUser.id;
-            const clientId = ctx.action.params.id;
+            const clientId = ctx.action?.params?.id;
+            if (!clientId) return;
             ctx.request.socket.setTimeout(0);
             ctx.req.socket.setNoDelay(true);
             ctx.req.socket.setKeepAlive(true);
@@ -163,8 +164,7 @@ export default class NotificationServer extends NotificationServerBase {
         count: {
           handler: async (ctx) => {
             const userId = ctx.state.currentUser.id;
-            const status = ctx.action.params.status;
-            const messages = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
+            const messages = this.plugin.app.db.getRepository(MessagesDefinition.name);
             const count = await messages.count({ filter: { userId, status: 'unread' } });
             ctx.body = { count };
           },
@@ -172,12 +172,12 @@ export default class NotificationServer extends NotificationServerBase {
         list: {
           handler: async (ctx) => {
             const userId = ctx.state.currentUser.id;
-            const messagesRepo = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
-            const { filter = {} } = ctx.action.params;
+            const messagesRepo = this.plugin.app.db.getRepository(MessagesDefinition.name);
+            const { filter = {} } = ctx.action?.params ?? {};
             const messageList = await messagesRepo.find({
               limit: 20,
               logging: console.log,
-              ...ctx.action.params,
+              ...(ctx.action?.params ?? {}),
               filter: {
                 ...filter,
                 userId,
@@ -190,8 +190,7 @@ export default class NotificationServer extends NotificationServerBase {
         update: {
           handler: async (ctx) => {
             const userId = ctx.state.currentUser.id;
-            const status = ctx.action.params.status;
-            const messages = this.plugin.app.db.getRepository(InAppMessagesDefinition.name);
+            const messages = this.plugin.app.db.getRepository(MessagesDefinition.name);
             const count = await messages.count({ filter: { userId, status: 'unread' } });
             ctx.body = { count };
           },
@@ -203,18 +202,31 @@ export default class NotificationServer extends NotificationServerBase {
       actions: {
         list: {
           handler: async (ctx) => {
-            const { filter = {}, limit = 30 } = ctx.action.params;
+            const { filter = {}, limit = 30 } = ctx.action?.params ?? {};
+            const messagesCollection = this.plugin.app.db.getCollection(MessagesDefinition.name);
+            const messagesTableName = messagesCollection.getRealTableName();
+            const channelsCollection = this.plugin.app.db.getCollection(ChannelsDefinition.name);
+            const channelsTableName = channelsCollection.getRealTableName();
             const userId = ctx.state.currentUser.id;
-            const conditions = [];
+            const conditions: any[] = [];
             if (userId) conditions.push({ userId });
             if (filter?.latestMsgReceiveTimestamp?.$lt) {
               conditions.push(Sequelize.literal(`latestMsgReceiveTimestamp < ${filter.latestMsgReceiveTimestamp.$lt}`));
             }
             if (filter?.id) conditions.push({ id: filter.id });
 
-            const chatsRepo = this.plugin.app.db.getRepository(ChatsDefinition.name);
+            const channelsRepo = this.plugin.app.db.getRepository(ChannelsDefinition.name);
             try {
-              const channelsRes = chatsRepo.find({
+              const messagesFieldName = {
+                channelId: messagesCollection.getRealFieldName(MessagesDefinition.fieldNameMap.chatId, true),
+                status: messagesCollection.getRealFieldName(MessagesDefinition.fieldNameMap.status, true),
+                receiveTimestamp: messagesCollection.getRealFieldName(
+                  MessagesDefinition.fieldNameMap.receiveTimestamp,
+                  true,
+                ),
+                title: messagesCollection.getRealFieldName(MessagesDefinition.fieldNameMap.title, true),
+              };
+              const channelsRes = channelsRepo.find({
                 limit,
                 filter,
                 attributes: {
@@ -222,41 +234,41 @@ export default class NotificationServer extends NotificationServerBase {
                     [
                       Sequelize.literal(`(
                                   SELECT COUNT(*)
-                                  FROM "${InAppMessagesDefinition.name}" AS messages
+                                  FROM ${messagesTableName} AS messages
                                   WHERE
-                                      messages."chatId" = "${ChatsDefinition.name}".id
+                                      messages.${messagesFieldName.channelId} = ${channelsTableName}.id
                               )`),
                       'totalMsgCnt',
                     ],
                     [
                       Sequelize.literal(`(
                                   SELECT COUNT(*)
-                                  FROM "${InAppMessagesDefinition.name}" AS messages
+                                  FROM ${messagesTableName} AS messages
                                   WHERE
-                                      messages."chatId" = "${ChatsDefinition.name}".id
+                                      messages.${messagesFieldName.channelId} = ${channelsTableName}.id
                                       AND
-                                      messages."status" = 'unread'
+                                      messages.${messagesFieldName.status} = 'unread'
                               )`),
                       'unreadMsgCnt',
                     ],
                     [
                       Sequelize.literal(`(
-                                  SELECT messages."receiveTimestamp"
-                                  FROM "${InAppMessagesDefinition.name}" AS messages
+                                  SELECT messages.${messagesFieldName.receiveTimestamp}
+                                  FROM ${messagesTableName} AS messages
                                   WHERE
-                                      messages."chatId" = "${ChatsDefinition.name}".id
-                                  ORDER BY messages."receiveTimestamp" DESC
+                                      messages.${messagesFieldName.channelId} = ${channelsTableName}.id
+                                  ORDER BY messages.${messagesFieldName.receiveTimestamp} DESC
                                   LIMIT 1
                               )`),
                       'latestMsgReceiveTimestamp',
                     ],
                     [
                       Sequelize.literal(`(
-                        SELECT messages."title"
-                                FROM "${InAppMessagesDefinition.name}" AS messages
+                        SELECT messages.${messagesFieldName.title}
+                                FROM ${messagesTableName} AS messages
                                 WHERE
-                                    messages."chatId" = "${ChatsDefinition.name}".id
-                                ORDER BY messages."receiveTimestamp" DESC
+                                    messages.${messagesFieldName.channelId} = ${channelsTableName}.id
+                                ORDER BY messages.${messagesFieldName.receiveTimestamp} DESC
                                 LIMIT 1
                     )`),
                       'latestMsgTitle',
@@ -269,7 +281,7 @@ export default class NotificationServer extends NotificationServerBase {
                 },
               });
 
-              const countRes = chatsRepo.count({
+              const countRes = channelsRepo.count({
                 logging: console.log,
                 filter: {
                   userId,
