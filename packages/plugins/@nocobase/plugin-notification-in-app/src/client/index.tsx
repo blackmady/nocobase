@@ -27,8 +27,12 @@ export class PluginNotificationInAppClient extends Plugin {
       title: tval('In-site message', { ns: NAMESPACE }),
       name: 'in-site-message',
       components: {
-        ChannelConfigForm: null,
         MessageConfigForm: MessageConfigForm,
+      },
+      meta: {
+        eidtable: false,
+        createable: false,
+        deletable: false,
       },
     });
   }

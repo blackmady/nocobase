@@ -177,6 +177,7 @@ export const channelsSchema: ISchema = {
                 openMode: 'drawer',
                 icon: 'EditOutlined',
               },
+              'x-hidden': true,
               'x-decorator': 'Space',
               properties: {
                 drawer: {

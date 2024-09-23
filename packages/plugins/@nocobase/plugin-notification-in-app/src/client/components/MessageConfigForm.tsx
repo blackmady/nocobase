@@ -102,7 +102,7 @@ export const MessageConfigForm = ({ variableOptions }) => {
             required: true,
             title: `{{t("Content")}}`,
             'x-decorator': 'FormItem',
-            'x-component': 'Variable.TextArea',
+            'x-component': 'Variable.RawTextArea',
             'x-component-props': {
               scope: variableOptions,
               placeholder: 'Hi,',
@@ -119,7 +119,7 @@ export const MessageConfigForm = ({ variableOptions }) => {
             'x-component': 'Variable.Input',
             'x-component-props': {
               scope: variableOptions,
-              placeholder: 'https://example.com',
+              placeholder: '/admin/settings/page',
               useTypedConstant: ['string'],
             },
           },

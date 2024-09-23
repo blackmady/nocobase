@@ -206,7 +206,6 @@ export default class NotificationServer extends NotificationServerBase {
             const messagesCollection = this.plugin.app.db.getCollection(MessagesDefinition.name);
             const messagesTableName = messagesCollection.getRealTableName(true);
             const channelsCollection = this.plugin.app.db.getCollection(ChannelsDefinition.name);
-            const channelsTableName = channelsCollection.getRealTableName(true);
             const channelsTableAliasName = this.plugin.app.db.sequelize
               .getQueryInterface()
               .quoteIdentifier(channelsCollection.name);

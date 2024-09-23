@@ -50,7 +50,7 @@ const AddNew = () => {
   const [visible, setVisible] = useState(false);
   const { NotificationTypeNameProvider, name, setName } = useNotificationTypeNameProvider();
   const api = useAPIClient();
-  const channelTypes = useChannelTypes();
+  const channelTypes = useChannelTypes().filter((item) => !(item.meta?.createable === false));
   const items =
     channelTypes.length === 0
       ? [
