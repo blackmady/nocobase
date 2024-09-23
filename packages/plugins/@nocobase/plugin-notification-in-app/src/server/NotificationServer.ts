@@ -204,9 +204,9 @@ export default class NotificationServer extends NotificationServerBase {
           handler: async (ctx) => {
             const { filter = {}, limit = 30 } = ctx.action?.params ?? {};
             const messagesCollection = this.plugin.app.db.getCollection(MessagesDefinition.name);
-            const messagesTableName = messagesCollection.getRealTableName();
+            const messagesTableName = messagesCollection.getRealTableName(true);
             const channelsCollection = this.plugin.app.db.getCollection(ChannelsDefinition.name);
-            const channelsTableName = channelsCollection.getRealTableName();
+            const channelsTableName = channelsCollection.getRealTableName(true);
             const userId = ctx.state.currentUser.id;
             const conditions: any[] = [];
             if (userId) conditions.push({ userId });
@@ -227,6 +227,7 @@ export default class NotificationServer extends NotificationServerBase {
                 title: messagesCollection.getRealFieldName(MessagesDefinition.fieldNameMap.title, true),
               };
               const channelsRes = channelsRepo.find({
+                logging: console.log,
                 limit,
                 filter,
                 attributes: {

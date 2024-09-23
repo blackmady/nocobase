@@ -814,12 +814,12 @@ export class Collection<
 
   public getRealTableName(quoted = false) {
     const realname = this.tableNameAsString();
-    return !quoted ? realname : this.db.sequelize.getQueryInterface().quoteIdentifier(realname, true);
+    return !quoted ? realname : this.db.sequelize.getQueryInterface().quoteIdentifiers(realname);
   }
 
   public getRealFieldName(name: string, quoted = false) {
     const realname = this.model.getAttributes()[name].field;
-    return !quoted ? name : this.db.sequelize.getQueryInterface().quoteIdentifier(realname, true);
+    return !quoted ? name : this.db.sequelize.getQueryInterface().quoteIdentifier(realname);
   }
 
   public getTableNameWithSchemaAsString() {
