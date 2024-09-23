@@ -30,7 +30,7 @@ export class PluginNotificationInAppClient extends Plugin {
         MessageConfigForm: MessageConfigForm,
       },
       meta: {
-        eidtable: false,
+        editable: false,
         createable: false,
         deletable: false,
       },

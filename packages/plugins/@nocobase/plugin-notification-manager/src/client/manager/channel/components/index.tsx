@@ -35,6 +35,8 @@ import {
   useEditFormProps,
   useCreateFormProps,
   useNotificationTypes,
+  useRecordDeleteActionProps,
+  useRecordEditActionProps,
 } from '../hooks';
 const useCloseAction = () => {
   const { setVisible } = useActionContext();
@@ -142,6 +144,8 @@ export const ChannelManager = () => {
               useCloseActionProps,
               useEditFormProps,
               useCreateFormProps,
+              useRecordDeleteActionProps,
+              useRecordEditActionProps,
             }}
           />
         </NotificationTypesContext.Provider>

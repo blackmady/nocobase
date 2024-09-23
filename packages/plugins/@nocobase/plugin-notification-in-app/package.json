@@ -1,6 +1,10 @@
 {
   "name": "@nocobase/plugin-notification-in-app",
   "version": "1.4.0-alpha",
+  "displayName": "Notification: In-app message",
+  "displayName.zh-CN": "通知：站内信",
+  "description": "Send in-app message in Notification Manager.",
+  "description.zh-CN": "在通知管理中发送站内信通知。",
   "main": "dist/server/index.js",
   "dependencies": {
     "immer": "^10.1.1"

@@ -18,7 +18,7 @@ export type ChannelType = {
   };
   meta?: {
     createable?: boolean;
-    eidtable?: boolean;
+    editable?: boolean;
     deletable?: boolean;
   };
 };

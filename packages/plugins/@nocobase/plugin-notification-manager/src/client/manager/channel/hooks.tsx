@@ -17,6 +17,7 @@ import {
   useBlockRequestContext,
   useDataBlockResource,
   usePlugin,
+  useDestroyActionProps,
 } from '@nocobase/client';
 import { uid } from '@formily/shared';
 import { App as AntdApp } from 'antd';
@@ -103,6 +104,31 @@ export const useEditFormProps = () => {
   return {
     form,
   };
+};
+
+export const useRecordEditActionProps = () => {
+  const channelTypes = useNotificationTypes();
+  const recordData = useCollectionRecordData();
+  const channelType = channelTypes.find((item) => item.name === recordData.notificationType);
+  const editable = channelType.meta.editable;
+  const style: React.CSSProperties = {};
+  if (!editable) {
+    style.display = 'none';
+  }
+  return { style };
+};
+
+export const useRecordDeleteActionProps = () => {
+  const channelTypes = useNotificationTypes();
+  const recordData = useCollectionRecordData();
+  const channelType = channelTypes.find((item) => item.name === recordData.notificationType);
+  const deletable = channelType.meta.deletable;
+  const style: React.CSSProperties = {};
+  const destroyProps = useDestroyActionProps();
+  if (!deletable) {
+    style.display = 'none';
+  }
+  return { ...destroyProps, style };
 };
 
 export const useCreateFormProps = () => {
