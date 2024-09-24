@@ -10,7 +10,7 @@
 import { observable, autorun } from '@formily/reactive';
 import { Message } from '../../types';
 import { getAPIClient } from '../utils';
-import { channelMapObs, selectedChannelIdObs } from './channel';
+import { channelMapObs, selectedChannelIdObs, fetchChannels } from './channel';
 import { InAppMessagesDefinition } from '../../types';
 
 export const messageMapObs = observable<{ value: Record<string, Message> }>({ value: {} });
@@ -45,7 +45,7 @@ export const fetchMessages = async (params: any = { limit: 30 }) => {
   isFecthingMessageObs.value = false;
 };
 
-export const updateMessage = async (params: any) => {
+export const updateMessage = async (params: { filterByTk: any; values: Record<any, any> }) => {
   const apiClient = getAPIClient();
   await apiClient.request({
     resource: InAppMessagesDefinition.name,
@@ -53,7 +53,10 @@ export const updateMessage = async (params: any) => {
     method: 'post',
     params,
   });
-  messageMapObs.value[params.filterByTk] = { ...messageMapObs.value[params.filterByTk], ...params.values };
+  const unupdatedMessage = messageMapObs.value[params.filterByTk];
+  messageMapObs.value[params.filterByTk] = { ...unupdatedMessage, ...params.values };
+  fetchChannels({ filter: { id: unupdatedMessage.chatId } });
+  updateUnreadMsgsCount();
 };
 
 autorun(() => {
@@ -75,12 +78,11 @@ export const updateUnreadMsgsCount = async () => {
 
 export const showMsgLoadingMoreObs = observable.computed(() => {
   const selectedChannelId = selectedChannelIdObs.value;
-  const selectedChannel = channelMapObs.value[selectedChannelIdObs.value];
+  if (!selectedChannelId) return false;
+  const selectedChannel = channelMapObs.value[selectedChannelId];
   const selectedMessageList = selectedMessageListObs.value;
   const isMoreMessage = selectedChannel.totalMsgCnt > selectedMessageList.length;
-  if (selectedChannelId && isMoreMessage && selectedMessageList.length > 0) {
+  if (isMoreMessage && selectedMessageList.length > 0) {
     return true;
-  } else {
-    return false;
   }
 }) as { value: boolean };

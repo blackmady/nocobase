@@ -84,6 +84,7 @@ const InnerInboxContent = () => {
       read: t('Read'),
       unread: t('Unread'),
     };
+    if (!selectedChannelId) return null;
     return (
       <>
         <Typography.Title level={4} style={{ marginTop: 12 }}>
@@ -166,7 +167,7 @@ const InnerInboxContent = () => {
               `}
               style={{
                 padding: '10px 15px',
-                backgroundColor: selectedChannelId === item.id ? '#e4e5e6' : null,
+                ...(selectedChannelId === item.id ? { backgroundColor: 'rgb(230, 244, 255)' } : {}),
                 height: '80px',
                 cursor: 'pointer',
                 display: 'flex',

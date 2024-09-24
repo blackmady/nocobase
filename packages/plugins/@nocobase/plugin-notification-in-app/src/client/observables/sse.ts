@@ -19,10 +19,12 @@ export const liveSSEObs = observable<{ value: SSEData | null }>({ value: null })
 autorun(() => {
   if (!liveSSEObs.value) return;
   const sseData = liveSSEObs.value;
-  if (sseData.type === 'message:created') {
+  if (['message:created', 'message:updated'].includes(sseData.type)) {
     const { data } = sseData;
     messageMapObs.value[data.id] = data;
-    notification.info({ message: data.title, description: data.content });
+    if (sseData.type === 'message:created') {
+      notification.info({ message: data.title, description: data.content });
+    }
     fetchChannels({ filter: { id: data.chatId } });
     updateUnreadMsgsCount();
   }
@@ -49,12 +51,10 @@ export const createMsgSSEConnection = async () => {
     try {
       const { value, done } = await reader.read();
       if (done) break;
-      const sseData: SSEData = JSON.parse(value.replace(/^data:\s*/, '').trim());
-      liveSSEObs.value = sseData;
-      if (sseData.type === 'message:created') {
-        const msgId = sseData.data.id;
-        fetchChannels({ id: sseData.data.chatId });
-        messageMapObs.value[msgId] = sseData.data;
+      const messages = value.split('\n\n').filter(Boolean);
+      for (const message of messages) {
+        const sseData: SSEData = JSON.parse(message.replace(/^data:\s*/, '').trim());
+        liveSSEObs.value = sseData;
       }
     } catch (error) {
       console.error(error);

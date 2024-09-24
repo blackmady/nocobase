@@ -13,7 +13,7 @@ import { getAPIClient } from '../utils';
 
 export const channelMapObs = observable<{ value: Record<string, Channel> }>({ value: {} });
 export const isFetchingChannelsObs = observable<{ value: boolean }>({ value: false });
-export const channelCountObs = observable<{ value: number }>({ value: null });
+export const channelCountObs = observable<{ value: number }>({ value: 0 });
 export const channelListObs = observable.computed(() => {
   const channels = Object.values(channelMapObs.value).sort((a, b) =>
     a.latestMsgReceiveTimestamp > b.latestMsgReceiveTimestamp ? -1 : 1,

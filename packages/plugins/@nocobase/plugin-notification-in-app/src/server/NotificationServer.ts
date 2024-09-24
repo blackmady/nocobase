@@ -27,13 +27,33 @@ export default class NotificationServer extends NotificationServerBase {
     super();
     this.userClientsMap = {};
     this.plugin = plugin;
+    this.onMessageCreatedOrUpdated();
   }
+  onMessageCreatedOrUpdated = async () => {
+    this.plugin.db.on(`${MessagesDefinition.name}.afterUpdate`, async (model, options) => {
+      const userId = model.userId;
+      this.sendDataToUser(userId, { type: 'message:updated', data: model.dataValues });
+    });
+    this.plugin.db.on(`${MessagesDefinition.name}.afterCreate`, async (model, options) => {
+      const userId = model.userId;
+      this.sendDataToUser(userId, { type: 'message:created', data: model.dataValues });
+    });
+  };
 
   addClient(userId: UserID, clientId: ClientID, stream: PassThrough) {
     if (!this.userClientsMap[userId]) {
       this.userClientsMap[userId] = {};
     }
     this.userClientsMap[userId][clientId] = stream;
+  }
+  sendDataToUser(userId: UserID, message: { type: string; data: any }) {
+    const clients = this.userClientsMap[userId];
+    if (clients) {
+      for (const clientId in clients) {
+        const stream = clients[clientId];
+        stream.write(`data: ${JSON.stringify(message)}\n\n`);
+      }
+    }
   }
 
   saveMessageToDB = async ({
@@ -90,14 +110,7 @@ export default class NotificationServer extends NotificationServerBase {
           status: 'unread',
           userId,
         });
-
-        const clients = this.userClientsMap[userId];
-        if (clients) {
-          for (const clientId in clients) {
-            const stream = clients[clientId];
-            stream.write(`data: ${JSON.stringify({ type: 'message:created', data: message })}\n\n`);
-          }
-        }
+        // this.sendDataToUser(userId, { type: 'message:created', data: message });
       }),
     );
     // 测试用
