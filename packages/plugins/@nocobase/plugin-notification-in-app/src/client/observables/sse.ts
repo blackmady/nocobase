@@ -11,7 +11,8 @@ import { observable, autorun } from '@formily/reactive';
 import { notification } from 'antd';
 import { SSEData } from '../../types';
 import { messageMapObs, updateUnreadMsgsCount } from './message';
-import { channelMapObs, fetchChannels } from './channel';
+import { channelMapObs, fetchChannels, selectedChannelIdObs } from './channel';
+import { inboxVisible } from './inbox';
 import { getAPIClient } from '../utils';
 
 export const liveSSEObs = observable<{ value: SSEData | null }>({ value: null });
@@ -23,7 +24,15 @@ autorun(() => {
     const { data } = sseData;
     messageMapObs.value[data.id] = data;
     if (sseData.type === 'message:created') {
-      notification.info({ message: data.title, description: data.content });
+      notification.info({
+        message: data.title,
+        description: data.content,
+        onClick: () => {
+          inboxVisible.value = true;
+          selectedChannelIdObs.value = data.chatId;
+          notification.destroy();
+        },
+      });
     }
     fetchChannels({ filter: { id: data.chatId } });
     updateUnreadMsgsCount();

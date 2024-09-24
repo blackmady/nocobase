@@ -97,6 +97,7 @@ const InnerInboxContent = () => {
           messages.map((message, index) => (
             <Card
               size={'small'}
+              bordered={false}
               style={{ marginTop: 24, cursor: 'pointer' }}
               title={
                 <span style={{ fontWeight: message.status === 'unread' ? 'bold' : 'normal' }}>{message.title}</span>
@@ -123,7 +124,7 @@ const InnerInboxContent = () => {
                     inboxVisible.value = false;
                   }}
                 >
-                  {t('Detail')}
+                  {t('View')}
                 </Button>
               }
               key={message.id}
@@ -134,7 +135,7 @@ const InnerInboxContent = () => {
                   {dayjs(message.receiveTimestamp).format('YYYY-MM-DD HH:mm:ss')}
                 </Descriptions.Item>
                 <Descriptions.Item label={t('Status')}>
-                  <Tag>{msgStatusDict[message.status]}</Tag>
+                  <Tag color={message.status === 'unread' ? '#f50' : '#87d068'}>{msgStatusDict[message.status]}</Tag>
                 </Descriptions.Item>
               </Descriptions>
             </Card>
@@ -168,7 +169,7 @@ const InnerInboxContent = () => {
               style={{
                 padding: '10px 15px',
                 ...(selectedChannelId === item.id ? { backgroundColor: 'rgb(230, 244, 255)' } : {}),
-                height: '80px',
+                height: '70px',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',

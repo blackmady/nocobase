@@ -53,7 +53,7 @@ const InnerInbox = (props) => {
   useEffect(() => {
     createMsgSSEConnection();
   }, []);
-
+  const DrawerTitle = <div style={{ padding: '0 15px' }}>{t('Inbox')}</div>;
   return (
     <ConfigProvider
       theme={{
@@ -63,10 +63,10 @@ const InnerInbox = (props) => {
       <Button className={styles.button} title={'Apps'} icon={<Icon type={'MailOutlined'} />} onClick={onIconClick} />
       {unreadMsgsCountObs.value && <Badge count={unreadMsgsCountObs.value} size="small" offset={[-18, -16]}></Badge>}
       <Drawer
-        title={t('Inbox')}
+        title={DrawerTitle}
         open={inboxVisible.value}
-        closeIcon={true}
-        width={800}
+        closeIcon={false}
+        width={850}
         onClose={() => {
           inboxVisible.value = false;
         }}
