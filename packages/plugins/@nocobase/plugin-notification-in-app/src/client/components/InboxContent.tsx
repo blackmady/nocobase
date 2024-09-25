@@ -111,21 +111,27 @@ const InnerInboxContent = () => {
                 });
               }}
               extra={
-                <Button
-                  type="link"
-                  onClick={() => {
-                    updateMessage({
-                      filterByTk: message.id,
-                      values: {
-                        status: 'read',
-                      },
-                    });
-                    navigate('/admin/78pwn4k87xo');
-                    inboxVisible.value = false;
-                  }}
-                >
-                  {t('View')}
-                </Button>
+                message.options?.url ? (
+                  <Button
+                    type="link"
+                    onClick={() => {
+                      updateMessage({
+                        filterByTk: message.id,
+                        values: {
+                          status: 'read',
+                        },
+                      });
+                      const url = message.options.url;
+                      if (url.startsWith('/')) navigate(url);
+                      else {
+                        window.location.href = url;
+                      }
+                      inboxVisible.value = false;
+                    }}
+                  >
+                    {t('View')}
+                  </Button>
+                ) : null
               }
               key={message.id}
             >
@@ -204,7 +210,18 @@ const InnerInboxContent = () => {
                 </div>
               </Flex>
               <Flex justify="space-between" style={{ width: '100%' }}>
-                <div style={{ color: 'rgba(0, 0, 0, 0.45)' }}> {item.latestMsgTitle}</div>
+                <div
+                  style={{
+                    color: 'rgba(0, 0, 0, 0.45)',
+                    width: '80%',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {' '}
+                  {item.latestMsgTitle}
+                </div>
                 <Badge count={item.unreadMsgCnt}></Badge>
               </Flex>
             </List.Item>

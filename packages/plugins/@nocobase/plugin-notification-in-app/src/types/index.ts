@@ -7,6 +7,8 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
+import options from 'packages/plugins/@nocobase/plugin-theme-editor/src/client/antd-token-previewer/component-demos/cascader/data';
+
 export interface Chat {
   id: string;
   userId: string;
@@ -37,6 +39,7 @@ export interface Message {
   receiveTimestamp: number;
   status: 'read' | 'unread';
   url: string;
+  options: Record<string, any>;
 }
 
 export type SSEData = {
@@ -50,6 +53,7 @@ export interface InAppMessageFormValues {
   senderId: string;
   url: string;
   title: string;
+  options: Record<string, any>;
 }
 
 export const InAppMessagesDefinition = {
@@ -62,6 +66,7 @@ export const InAppMessagesDefinition = {
     status: 'status',
     title: 'title',
     receiveTimestamp: 'receiveTimestamp',
+    options: 'options',
   },
 } as const;
 

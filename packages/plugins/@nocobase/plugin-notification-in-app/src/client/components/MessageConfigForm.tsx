@@ -111,18 +111,23 @@ export const MessageConfigForm = ({ variableOptions }) => {
               },
             },
           },
-          url: {
-            type: 'string',
-            required: true,
-            title: `{{t("Redirect URL")}}`,
-            'x-decorator': 'FormItem',
-            'x-component': 'Variable.Input',
-            'x-component-props': {
-              scope: variableOptions,
-              placeholder: '/admin/settings/page',
-              useTypedConstant: ['string'],
+          options: {
+            type: 'object',
+            properties: {
+              url: {
+                type: 'string',
+                required: true,
+                title: `{{t("Redirect URL")}}`,
+                'x-decorator': 'FormItem',
+                'x-component': 'Variable.Input',
+                'x-component-props': {
+                  scope: variableOptions,
+                  useTypedConstant: ['string'],
+                },
+              },
             },
           },
+
           senderId: {
             type: 'string',
             default: crypto.randomUUID(),

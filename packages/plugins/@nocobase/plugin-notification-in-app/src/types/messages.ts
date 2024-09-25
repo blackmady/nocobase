@@ -28,7 +28,7 @@ export const messageCollection: CollectionOptions = {
       },
     },
     {
-      name: 'userId',
+      name: InAppMessagesDefinition.fieldNameMap.userId,
       type: 'bigInt',
       uiSchema: {
         type: 'number',
@@ -51,8 +51,8 @@ export const messageCollection: CollectionOptions = {
       },
     },
     {
-      name: 'title',
-      type: 'string',
+      name: InAppMessagesDefinition.fieldNameMap.title,
+      type: 'text',
       uiSchema: {
         type: 'string',
         'x-component': 'Input',
@@ -62,7 +62,7 @@ export const messageCollection: CollectionOptions = {
     },
     {
       name: InAppMessagesDefinition.fieldNameMap.content,
-      type: 'string',
+      type: 'text',
       interface: 'string',
       uiSchema: {
         type: 'string',
@@ -94,8 +94,12 @@ export const messageCollection: CollectionOptions = {
       },
     },
     {
-      name: 'receiveTimestamp',
+      name: InAppMessagesDefinition.fieldNameMap.receiveTimestamp,
       type: 'bigInt',
+    },
+    {
+      name: InAppMessagesDefinition.fieldNameMap.options,
+      type: 'json',
     },
   ],
 };

@@ -64,6 +64,7 @@ export default class NotificationServer extends NotificationServerBase {
     userId,
     title,
     receiveTimestamp,
+    options = {},
   }: {
     content: string;
     senderName: string;
@@ -72,6 +73,7 @@ export default class NotificationServer extends NotificationServerBase {
     title: string;
     status: 'read' | 'unread';
     receiveTimestamp?: number;
+    options?: Record<string, any>;
   }): Promise<any> => {
     const chatsRepo = this.plugin.app.db.getRepository(ChannelsDefinition.name);
     const messagesRepo = this.plugin.app.db.getRepository(MessagesDefinition.name);
@@ -88,15 +90,16 @@ export default class NotificationServer extends NotificationServerBase {
         status,
         userId,
         receiveTimestamp: receiveTimestamp ?? Date.now(),
+        options,
       },
     });
     await chatsRepo.update({ values: { latestMsgId: message.id }, filterByTk: chat.id });
     return message;
   };
 
-  send: SendFnType<InAppMessageFormValues> = async (options) => {
-    const { message } = options;
-    const { content, receivers: userSelectionConfig, title, senderId, senderName } = message;
+  send: SendFnType<InAppMessageFormValues> = async (params) => {
+    const { message } = params;
+    const { content, receivers: userSelectionConfig, title, senderId, senderName, options = {} } = message;
     const userRepo = this.plugin.app.db.getRepository('users');
     const receivers = await parseUserSelectionConf(userSelectionConfig, userRepo);
 
@@ -109,44 +112,11 @@ export default class NotificationServer extends NotificationServerBase {
           senderId,
           status: 'unread',
           userId,
+          options,
         });
-        // this.sendDataToUser(userId, { type: 'message:created', data: message });
       }),
     );
-    // 测试用
-    // await this.mockMessages();
     return { status: 'success', message };
-  };
-
-  mockMessages = async () => {
-    function randomTimestamp() {
-      return 1726026118768 - Math.floor(Math.random() * 1000 * 3600 * 24 * 180);
-    }
-
-    const writeMessages = async (i: number, userId: string, senderId: string, senderName: string) => {
-      for (let j = 0; j < 100; j++) {
-        const content = `${senderName}-content-${uid()}`;
-        const title = `sender${i}-${uid()}`;
-        if (i > 2 && j > 1) break;
-        await this.saveMessageToDB({
-          content,
-          title,
-          senderName,
-          senderId,
-          status: 'unread',
-          userId,
-          receiveTimestamp: i < 2 ? Date.now() : randomTimestamp(),
-        });
-      }
-      return true;
-    };
-
-    for (let i = 0; i < 100; i++) {
-      const senderId = randomUUID();
-      const userId = '1';
-      const senderName = `senderName${uid()}`;
-      await writeMessages(i, userId, senderId, senderName);
-    }
   };
 
   defineActions() {

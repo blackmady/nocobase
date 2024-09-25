@@ -81,7 +81,7 @@ export default class NotificationManager {
       return logData;
     } catch (error) {
       logData.status = 'failure';
-      logData.reason = error.reason;
+      logData.reason = error.reason ?? error.message;
       this.createSendingRecord(logData);
       return logData;
     }
