@@ -6,9 +6,6 @@
  * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
-
-import options from 'packages/plugins/@nocobase/plugin-theme-editor/src/client/antd-token-previewer/component-demos/cascader/data';
-
 export interface Chat {
   id: string;
   userId: string;
